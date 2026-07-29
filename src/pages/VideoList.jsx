@@ -70,11 +70,11 @@ export default function VideoList() {
     <div className="page">
       <div className="page-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
-          <img
-            src="/login-logo.png"
-            alt="LOVE AND PEACE"
-            style={{ width: '40px', height: '40px', objectFit: 'contain' }}
-          />
+         <img
+  src="/login-logo.png"
+  alt="LOVE AND PEACE"
+  style={{ width: '100px', height: '100px', objectFit: 'contain' }}
+/>
           <div>
             <h1>動画一覧</h1>
             <div className="team-tag">{team} ・ {member} さん</div>
