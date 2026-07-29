@@ -109,7 +109,6 @@ export default function Login() {
 
         {step === 2 && (
           <form className="login-form" onSubmit={handleMemberSubmit}>
-            <p className="login-step-label">{team} として、お名前を選んでください</p>
             <div>
               <label className="field-label">お名前</label>
               <select
@@ -127,7 +126,7 @@ export default function Login() {
             </div>
             {error && <p className="error-text">{error}</p>}
             <button className="btn-primary" type="submit">
-              はじめる
+              ログインする
             </button>
           </form>
         )}
