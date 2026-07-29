@@ -11,6 +11,7 @@ export default function Admin() {
   const [selectedTeam, setSelectedTeam] = useState('')
   const [title, setTitle] = useState('')
   const [url, setUrl] = useState('')
+  const [description, setDescription] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState('')
   const [formError, setFormError] = useState('')
@@ -49,10 +50,16 @@ export default function Admin() {
     }
     setSubmitting(true)
     try {
-      await apiPost('postVideo', { team: selectedTeam, title: title.trim(), url: url.trim() })
+      await apiPost('postVideo', {
+        team: selectedTeam,
+        title: title.trim(),
+        url: url.trim(),
+        description: description.trim(),
+      })
       setMessage(`「${title.trim()}」を${selectedTeam}に追加しました`)
       setTitle('')
       setUrl('')
+      setDescription('')
     } catch {
       setFormError('投稿に失敗しました。時間をおいて再度お試しください')
     } finally {
@@ -132,6 +139,17 @@ export default function Admin() {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://www.youtube.com/watch?v=..."
+          />
+        </div>
+
+        <div>
+          <label className="field-label">解説文（動画の上に表示されます）</label>
+          <textarea
+            className="field-input"
+            style={{ minHeight: '90px', resize: 'vertical' }}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="この動画のポイントや練習の意図などを書いてください"
           />
         </div>
 
