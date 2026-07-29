@@ -85,14 +85,6 @@ export default function VideoList() {
           ログアウト
         </button>
       </div>
-            <h1>動画一覧</h1>
-            <div className="team-tag">{team} ・ {member} さん</div>
-          </div>
-        </div>
-        <button className="btn-ghost" onClick={handleLogout}>
-          ログアウト
-        </button>
-      </div>
 
       {loading && <p className="team-tag">読み込み中…</p>}
 
