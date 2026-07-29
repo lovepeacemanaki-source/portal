@@ -16,8 +16,7 @@ export default function Login() {
 
   useEffect(() => {
     apiGet('getTeams').then((res) => {
-      // 管理画面用の "admin" はログイン画面の選択肢からは除外
-      setTeams((res.teams || []).filter((t) => t !== 'admin'))
+      setTeams(res.teams || [])
     })
   }, [])
 
@@ -32,6 +31,11 @@ export default function Login() {
     try {
       const res = await apiGet('login', { team: team.trim(), password: password.trim() })
       if (res.success) {
+        if (team.trim() === 'admin') {
+          localStorage.setItem('lp_admin', 'true')
+          navigate('/admin')
+          return
+        }
         const membersRes = await apiGet('getMembers', { team: team.trim() })
         setMembers(membersRes.members || [])
         setStep(2)
@@ -84,45 +88,3 @@ export default function Login() {
             <div>
               <label className="field-label">パスワード</label>
               <input
-                className="field-input"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="パスワードを入力"
-              />
-            </div>
-            {error && <p className="error-text">{error}</p>}
-            <button className="btn-primary" type="submit" disabled={loading}>
-              {loading ? '確認中…' : 'ログイン'}
-            </button>
-          </form>
-        )}
-
-        {step === 2 && (
-          <form className="login-form" onSubmit={handleMemberSubmit}>
-            <p className="login-step-label">{team} として、お名前を選んでください</p>
-            <div>
-              <label className="field-label">お名前</label>
-              <select
-                className="field-input"
-                value={selectedMember}
-                onChange={(e) => setSelectedMember(e.target.value)}
-              >
-                <option value="">選択してください</option>
-                {members.map((m) => (
-                  <option key={m.memberID} value={m.name}>
-                    {m.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {error && <p className="error-text">{error}</p>}
-            <button className="btn-primary" type="submit">
-              はじめる
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
-  )
-}
