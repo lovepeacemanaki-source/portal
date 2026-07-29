@@ -64,9 +64,11 @@ export default function Login() {
     <div className="login-screen">
       <ConstellationBg />
       <div className="login-card">
-        <div className="login-eyebrow">LOVE AND PEACE</div>
-        <h1 className="login-title">Love and Peace</h1>
-        <p className="login-subtitle">ポータルサイト</p>
+        <img
+  src="/login-logo.png"
+  alt="LOVE AND PEACE ポータルサイト"
+  style={{ width: '100%', maxWidth: '320px', marginBottom: '2rem' }}
+/>
 
         {step === 1 && (
           <form className="login-form" onSubmit={handleTeamSubmit}>
