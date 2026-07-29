@@ -13,6 +13,8 @@ export default function Admin() {
 
   const [teams, setTeams] = useState([])
   const [selectedTeam, setSelectedTeam] = useState('')
+  const [teamVideos, setTeamVideos] = useState([])
+  const [editingId, setEditingId] = useState(null)
   const [title, setTitle] = useState('')
   const [url, setUrl] = useState('')
   const [description, setDescription] = useState('')
@@ -25,6 +27,21 @@ export default function Admin() {
       apiGet('getTeams').then((res) => setTeams(res.teams || []))
     }
   }, [authed])
+
+  useEffect(() => {
+    if (selectedTeam) {
+      loadTeamVideos()
+    } else {
+      setTeamVideos([])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTeam])
+
+  function loadTeamVideos() {
+    apiGet('getVideos', { team: selectedTeam }).then((res) => {
+      setTeamVideos(res.videos || [])
+    })
+  }
 
   async function handleAuth(e) {
     e.preventDefault()
@@ -55,21 +72,50 @@ export default function Admin() {
     }
     setSubmitting(true)
     try {
-      await apiPost('postVideo', {
-        team: selectedTeam,
-        title: title.trim(),
-        url: url.trim(),
-        description: description.trim(),
-      })
-      setMessage(`「${title.trim()}」を${selectedTeam}に追加しました`)
+      if (editingId) {
+        await apiPost('updateVideo', {
+          videoID: editingId,
+          title: title.trim(),
+          url: url.trim(),
+          description: description.trim(),
+        })
+        setMessage(`「${title.trim()}」を更新しました`)
+        setEditingId(null)
+      } else {
+        await apiPost('postVideo', {
+          team: selectedTeam,
+          title: title.trim(),
+          url: url.trim(),
+          description: description.trim(),
+        })
+        setMessage(`「${title.trim()}」を${selectedTeam}に追加しました`)
+      }
       setTitle('')
       setUrl('')
       setDescription('')
+      loadTeamVideos()
     } catch {
-      setFormError('投稿に失敗しました。時間をおいて再度お試しください')
+      setFormError('保存に失敗しました。時間をおいて再度お試しください')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  function startEdit(video) {
+    setEditingId(video.videoID)
+    setTitle(video.title)
+    setUrl(video.url)
+    setDescription(video.description || '')
+    setMessage('')
+    setFormError('')
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setTitle('')
+    setUrl('')
+    setDescription('')
+    setFormError('')
   }
 
   function handleLogout() {
@@ -122,7 +168,10 @@ export default function Admin() {
           <select
             className="field-input"
             value={selectedTeam}
-            onChange={(e) => setSelectedTeam(e.target.value)}
+            onChange={(e) => {
+              setSelectedTeam(e.target.value)
+              cancelEdit()
+            }}
           >
             <option value="">選択してください</option>
             {teams.map((t) => (
@@ -132,6 +181,29 @@ export default function Admin() {
             ))}
           </select>
         </div>
+
+        {selectedTeam && teamVideos.length > 0 && (
+          <div>
+            <label className="field-label">{selectedTeam}の動画一覧（クリックで編集）</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {teamVideos.map((v) => (
+                <button
+                  type="button"
+                  key={v.videoID}
+                  onClick={() => startEdit(v)}
+                  className="btn-ghost"
+                  style={{
+                    textAlign: 'left',
+                    borderRadius: 'var(--radius-sm)',
+                    borderColor: editingId === v.videoID ? 'var(--accent-gold)' : 'var(--line)',
+                  }}
+                >
+                  {v.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div>
           <label className="field-label">動画タイトル</label>
@@ -169,9 +241,16 @@ export default function Admin() {
         {formError && <p className="error-text">{formError}</p>}
         {message && <p className="success-banner">{message}</p>}
 
-        <button className="btn-primary" type="submit" disabled={submitting}>
-          {submitting ? '投稿中…' : '追加する'}
-        </button>
+        <div style={{ display: 'flex', gap: '0.8rem' }}>
+          <button className="btn-primary" type="submit" disabled={submitting}>
+            {submitting ? '保存中…' : editingId ? '更新する' : '追加する'}
+          </button>
+          {editingId && (
+            <button type="button" className="btn-ghost" onClick={cancelEdit}>
+              キャンセル
+            </button>
+          )}
+        </div>
       </form>
     </div>
   )
