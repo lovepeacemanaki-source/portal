@@ -12,6 +12,7 @@ export default function Admin() {
   const [checking, setChecking] = useState(false)
 
   const [teams, setTeams] = useState([])
+  const [allTeamVideos, setAllTeamVideos] = useState({})
   const [selectedTeam, setSelectedTeam] = useState('')
   const [teamVideos, setTeamVideos] = useState([])
   const [editingId, setEditingId] = useState(null)
@@ -31,9 +32,27 @@ export default function Admin() {
 
   useEffect(() => {
     if (authed) {
-      apiGet('getTeams').then((res) => setTeams(res.teams || []))
+      apiGet('getTeams').then((res) => {
+        const teamList = (res.teams || []).filter((t) => t !== '管理人')
+        setTeams(teamList)
+        loadAllTeamVideos(teamList)
+      })
     }
   }, [authed])
+
+  function loadAllTeamVideos(teamList) {
+    Promise.all(
+      teamList.map((t) =>
+        apiGet('getVideos', { team: t }).then((res) => ({ team: t, videos: res.videos || [] }))
+      )
+    ).then((results) => {
+      const map = {}
+      results.forEach(({ team, videos }) => {
+        map[team] = videos
+      })
+      setAllTeamVideos(map)
+    })
+  }
 
   useEffect(() => {
     if (selectedTeam) {
@@ -137,6 +156,7 @@ export default function Admin() {
       setUrl('')
       setDescription('')
       loadTeamVideos()
+      loadAllTeamVideos(teams)
     } catch {
       setFormError('保存に失敗しました。時間をおいて再度お試しください')
     } finally {
@@ -198,12 +218,35 @@ export default function Admin() {
 
   return (
     <div className="page">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '2.2rem' }}>
-        <h1 className="admin-heading">動画を追加</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem' }}>
+        <h1 className="admin-heading">全チームの動画一覧</h1>
         <button className="btn-ghost" onClick={handleLogout}>
           ログアウト
         </button>
       </div>
+
+      <div className="team-overview">
+        {teams.map((t) => (
+          <div key={t} className="team-overview-row">
+            <div className="team-overview-name">{t}</div>
+            <div className="team-overview-videos">
+              {(allTeamVideos[t] || []).length === 0 ? (
+                <span className="team-tag">動画なし</span>
+              ) : (
+                allTeamVideos[t].map((v) => (
+                  <span key={v.videoID} className="team-overview-chip">
+                    {v.title}
+                  </span>
+                ))
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ height: '1px', background: 'var(--line)', margin: '2.5rem 0' }} />
+
+      <h1 className="admin-heading" style={{ marginBottom: '1.5rem' }}>動画を追加・編集</h1>
 
       <form className="admin-form" onSubmit={handlePostVideo}>
         <div>
