@@ -436,6 +436,12 @@ button {
   gap: 0.9rem;
 }
 
+.team-overview-chip-date {
+  color: var(--text-faint);
+  font-size: 0.74rem;
+  margin-left: 0.5rem;
+}
+
 .team-overview-row {
   background: var(--surface);
   border: 1px solid var(--line);
