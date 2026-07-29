@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiGet, apiPost } from '../config.js'
 
@@ -14,6 +14,7 @@ export default function VideoList() {
   const [commentDrafts, setCommentDrafts] = useState({})
   const [submittingId, setSubmittingId] = useState(null)
   const [feedbackError, setFeedbackError] = useState('')
+  const rowRefs = useRef({})
 
   useEffect(() => {
     if (!team || !member) {
@@ -31,6 +32,15 @@ export default function VideoList() {
     localStorage.removeItem('lp_member')
     navigate('/')
   }
+
+  useEffect(() => {
+    if (expandedId && rowRefs.current[expandedId]) {
+      // レイアウトの再計算(閉じたカード分のズレ)が終わるのを待ってからスクロール
+      requestAnimationFrame(() => {
+        rowRefs.current[expandedId]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    }
+  }, [expandedId])
 
   function toggleExpand(video) {
     if (expandedId === video.videoID) {
@@ -100,7 +110,13 @@ export default function VideoList() {
             const feedback = feedbackByVideo[v.videoID] || []
 
             return (
-              <div key={v.videoID} className="video-row">
+              <div
+                key={v.videoID}
+                ref={(el) => {
+                  rowRefs.current[v.videoID] = el
+                }}
+                className="video-row"
+              >
                 <button
                   type="button"
                   className="video-row-header"
