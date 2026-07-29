@@ -404,6 +404,10 @@ button {
   border-color: var(--accent-btn);
 }
 
+.feedback-form textarea::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+
 .feedback-poster {
   font-size: 0.82rem;
   color: var(--text-dim);
