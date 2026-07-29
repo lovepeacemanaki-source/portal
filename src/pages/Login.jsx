@@ -1,0 +1,115 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { apiGet } from '../config.js'
+import ConstellationBg from '../components/ConstellationBg.jsx'
+
+export default function Login() {
+  const navigate = useNavigate()
+  const [step, setStep] = useState(1) // 1: チーム+パスワード, 2: 名前選択
+  const [team, setTeam] = useState('')
+  const [password, setPassword] = useState('')
+  const [members, setMembers] = useState([])
+  const [selectedMember, setSelectedMember] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  async function handleTeamSubmit(e) {
+    e.preventDefault()
+    setError('')
+    if (!team.trim() || !password.trim()) {
+      setError('チーム名とパスワードを入力してください')
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await apiGet('login', { team: team.trim(), password: password.trim() })
+      if (res.success) {
+        const membersRes = await apiGet('getMembers', { team: team.trim() })
+        setMembers(membersRes.members || [])
+        setStep(2)
+      } else {
+        setError(res.message || 'ログインに失敗しました')
+      }
+    } catch {
+      setError('通信エラーが発生しました。時間をおいて再度お試しください')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function handleMemberSubmit(e) {
+    e.preventDefault()
+    if (!selectedMember) {
+      setError('お名前を選択してください')
+      return
+    }
+    localStorage.setItem('lp_team', team.trim())
+    localStorage.setItem('lp_member', selectedMember)
+    navigate('/videos')
+  }
+
+  return (
+    <div className="login-screen">
+      <ConstellationBg />
+      <div className="login-card">
+        <div className="login-eyebrow">LOVE AND PEACE</div>
+        <h1 className="login-title">Love and Peace</h1>
+        <p className="login-subtitle">ポータルサイト</p>
+
+        {step === 1 && (
+          <form className="login-form" onSubmit={handleTeamSubmit}>
+            <div>
+              <label className="field-label">チーム名</label>
+              <input
+                className="field-input"
+                type="text"
+                value={team}
+                onChange={(e) => setTeam(e.target.value)}
+                placeholder="例）関西チーム"
+              />
+            </div>
+            <div>
+              <label className="field-label">パスワード</label>
+              <input
+                className="field-input"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="パスワードを入力"
+              />
+            </div>
+            {error && <p className="error-text">{error}</p>}
+            <button className="btn-primary" type="submit" disabled={loading}>
+              {loading ? '確認中…' : 'ログイン'}
+            </button>
+          </form>
+        )}
+
+        {step === 2 && (
+          <form className="login-form" onSubmit={handleMemberSubmit}>
+            <p className="login-step-label">{team} として、お名前を選んでください</p>
+            <div>
+              <label className="field-label">お名前</label>
+              <select
+                className="field-input"
+                value={selectedMember}
+                onChange={(e) => setSelectedMember(e.target.value)}
+              >
+                <option value="">選択してください</option>
+                {members.map((m) => (
+                  <option key={m.memberID} value={m.name}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {error && <p className="error-text">{error}</p>}
+            <button className="btn-primary" type="submit">
+              はじめる
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}

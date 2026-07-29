@@ -1,0 +1,147 @@
+import { useEffect, useState } from 'react'
+import { apiGet, apiPost } from '../config.js'
+
+export default function Admin() {
+  const [authed, setAuthed] = useState(false)
+  const [password, setPassword] = useState('')
+  const [authError, setAuthError] = useState('')
+  const [checking, setChecking] = useState(false)
+
+  const [teams, setTeams] = useState([])
+  const [selectedTeam, setSelectedTeam] = useState('')
+  const [title, setTitle] = useState('')
+  const [url, setUrl] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [message, setMessage] = useState('')
+  const [formError, setFormError] = useState('')
+
+  useEffect(() => {
+    if (authed) {
+      apiGet('getTeams').then((res) => setTeams(res.teams || []))
+    }
+  }, [authed])
+
+  async function handleAuth(e) {
+    e.preventDefault()
+    setAuthError('')
+    setChecking(true)
+    try {
+      const res = await apiGet('login', { team: 'admin', password: password.trim() })
+      if (res.success) {
+        setAuthed(true)
+      } else {
+        setAuthError('パスワードが違います')
+      }
+    } catch {
+      setAuthError('通信エラーが発生しました')
+    } finally {
+      setChecking(false)
+    }
+  }
+
+  async function handlePostVideo(e) {
+    e.preventDefault()
+    setMessage('')
+    setFormError('')
+    if (!selectedTeam || !title.trim() || !url.trim()) {
+      setFormError('すべての項目を入力してください')
+      return
+    }
+    setSubmitting(true)
+    try {
+      await apiPost('postVideo', { team: selectedTeam, title: title.trim(), url: url.trim() })
+      setMessage(`「${title.trim()}」を${selectedTeam}に追加しました`)
+      setTitle('')
+      setUrl('')
+    } catch {
+      setFormError('投稿に失敗しました。時間をおいて再度お試しください')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (!authed) {
+    return (
+      <div className="login-screen">
+        <div className="login-card">
+          <div className="login-eyebrow">ADMIN</div>
+          <h1 className="login-title" style={{ fontSize: '2.2rem' }}>
+            管理画面
+          </h1>
+          <p className="login-subtitle">動画の追加はこちらから</p>
+          <form className="login-form" onSubmit={handleAuth}>
+            <div>
+              <label className="field-label">管理者パスワード</label>
+              <input
+                className="field-input"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="パスワードを入力"
+              />
+            </div>
+            {authError && <p className="error-text">{authError}</p>}
+            <button className="btn-primary" type="submit" disabled={checking}>
+              {checking ? '確認中…' : '入る'}
+            </button>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <h1>動画を追加</h1>
+      </div>
+
+      <form className="admin-form" onSubmit={handlePostVideo}>
+        <div>
+          <label className="field-label">チーム</label>
+          <select
+            className="field-input"
+            value={selectedTeam}
+            onChange={(e) => setSelectedTeam(e.target.value)}
+          >
+            <option value="">選択してください</option>
+            {teams.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="field-label">動画タイトル</label>
+          <input
+            className="field-input"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="例）7月度 練習動画"
+          />
+        </div>
+
+        <div>
+          <label className="field-label">YouTube URL</label>
+          <input
+            className="field-input"
+            type="text"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://www.youtube.com/watch?v=..."
+          />
+        </div>
+
+        {formError && <p className="error-text">{formError}</p>}
+        {message && <p className="success-banner">{message}</p>}
+
+        <button className="btn-primary" type="submit" disabled={submitting}>
+          {submitting ? '投稿中…' : '追加する'}
+        </button>
+      </form>
+    </div>
+  )
+}
