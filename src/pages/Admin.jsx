@@ -22,6 +22,13 @@ export default function Admin() {
   const [message, setMessage] = useState('')
   const [formError, setFormError] = useState('')
 
+  const [memberTeam, setMemberTeam] = useState('')
+  const [memberName, setMemberName] = useState('')
+  const [teamMembers, setTeamMembers] = useState([])
+  const [memberSubmitting, setMemberSubmitting] = useState(false)
+  const [memberMessage, setMemberMessage] = useState('')
+  const [memberError, setMemberError] = useState('')
+
   useEffect(() => {
     if (authed) {
       apiGet('getTeams').then((res) => setTeams(res.teams || []))
@@ -41,6 +48,42 @@ export default function Admin() {
     apiGet('getVideos', { team: selectedTeam }).then((res) => {
       setTeamVideos(res.videos || [])
     })
+  }
+
+  useEffect(() => {
+    if (memberTeam) {
+      loadTeamMembers()
+    } else {
+      setTeamMembers([])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memberTeam])
+
+  function loadTeamMembers() {
+    apiGet('getMembers', { team: memberTeam }).then((res) => {
+      setTeamMembers(res.members || [])
+    })
+  }
+
+  async function handleAddMember(e) {
+    e.preventDefault()
+    setMemberMessage('')
+    setMemberError('')
+    if (!memberTeam || !memberName.trim()) {
+      setMemberError('チームと名前を入力してください')
+      return
+    }
+    setMemberSubmitting(true)
+    try {
+      await apiPost('postMember', { team: memberTeam, name: memberName.trim() })
+      setMemberMessage(`「${memberName.trim()}」を${memberTeam}に追加しました`)
+      setMemberName('')
+      loadTeamMembers()
+    } catch {
+      setMemberError('追加に失敗しました。時間をおいて再度お試しください')
+    } finally {
+      setMemberSubmitting(false)
+    }
   }
 
   async function handleAuth(e) {
@@ -251,6 +294,53 @@ export default function Admin() {
             </button>
           )}
         </div>
+      </form>
+
+      <div style={{ height: '1px', background: 'var(--line)', margin: '2.5rem 0' }} />
+
+      <h1 style={{ marginBottom: '1.2rem' }}>メンバーを追加</h1>
+
+      <form className="admin-form" onSubmit={handleAddMember}>
+        <div>
+          <label className="field-label">チーム</label>
+          <select
+            className="field-input"
+            value={memberTeam}
+            onChange={(e) => setMemberTeam(e.target.value)}
+          >
+            <option value="">選択してください</option>
+            {teams.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {memberTeam && teamMembers.length > 0 && (
+          <div>
+            <label className="field-label">{memberTeam}の現在のメンバー</label>
+            <p className="team-tag">{teamMembers.map((m) => m.name).join('、')}</p>
+          </div>
+        )}
+
+        <div>
+          <label className="field-label">名前</label>
+          <input
+            className="field-input"
+            type="text"
+            value={memberName}
+            onChange={(e) => setMemberName(e.target.value)}
+            placeholder="例）田中"
+          />
+        </div>
+
+        {memberError && <p className="error-text">{memberError}</p>}
+        {memberMessage && <p className="success-banner">{memberMessage}</p>}
+
+        <button className="btn-primary" type="submit" disabled={memberSubmitting}>
+          {memberSubmitting ? '追加中…' : 'メンバーを追加'}
+        </button>
       </form>
     </div>
   )
