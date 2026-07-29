@@ -29,9 +29,9 @@ export default function Login() {
     }
     setLoading(true)
     try {
-      const res = await apiGet('login', { team: team.trim(), password: password.trim() })
+      const res = await apiGet('login', { team: '管理人', password: password.trim() })
       if (res.success) {
-        if (team.trim() === 'admin') {
+        if (team.trim() === '管理人') {
           localStorage.setItem('lp_admin', 'true')
           navigate('/admin')
           return
