@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { apiGet, apiPost } from '../config.js'
 
 export default function Admin() {
+  const navigate = useNavigate()
   const [authed, setAuthed] = useState(
     () => localStorage.getItem('lp_admin') === 'true'
   )
@@ -29,7 +31,7 @@ export default function Admin() {
     setAuthError('')
     setChecking(true)
     try {
-      const res = await apiGet('login', { team: 'admin', password: password.trim() })
+      const res = await apiGet('login', { team: '管理人', password: password.trim() })
       if (res.success) {
         localStorage.setItem('lp_admin', 'true')
         setAuthed(true)
@@ -70,6 +72,11 @@ export default function Admin() {
     }
   }
 
+  function handleLogout() {
+    localStorage.removeItem('lp_admin')
+    navigate('/')
+  }
+
   if (!authed) {
     return (
       <div className="login-screen">
@@ -104,6 +111,9 @@ export default function Admin() {
     <div className="page">
       <div className="page-header">
         <h1>動画を追加</h1>
+        <button className="btn-ghost" onClick={handleLogout}>
+          ログアウト
+        </button>
       </div>
 
       <form className="admin-form" onSubmit={handlePostVideo}>
