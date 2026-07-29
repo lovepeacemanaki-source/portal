@@ -30,6 +30,12 @@ export default function Admin() {
   const [memberMessage, setMemberMessage] = useState('')
   const [memberError, setMemberError] = useState('')
 
+  const [newTeamName, setNewTeamName] = useState('')
+  const [newTeamPassword, setNewTeamPassword] = useState('')
+  const [teamSubmitting, setTeamSubmitting] = useState(false)
+  const [teamMessage, setTeamMessage] = useState('')
+  const [teamError, setTeamError] = useState('')
+
   useEffect(() => {
     if (authed) {
       apiGet('getTeams').then((res) => {
@@ -82,6 +88,38 @@ export default function Admin() {
     apiGet('getMembers', { team: memberTeam }).then((res) => {
       setTeamMembers(res.members || [])
     })
+  }
+
+  async function handleAddTeam(e) {
+    e.preventDefault()
+    setTeamMessage('')
+    setTeamError('')
+    if (!newTeamName.trim() || !newTeamPassword.trim()) {
+      setTeamError('チーム名とパスワードを入力してください')
+      return
+    }
+    setTeamSubmitting(true)
+    try {
+      const res = await apiPost('postTeam', {
+        teamName: newTeamName.trim(),
+        password: newTeamPassword.trim(),
+      })
+      if (res.success) {
+        setTeamMessage(`「${newTeamName.trim()}」を追加しました`)
+        setNewTeamName('')
+        setNewTeamPassword('')
+        const teamsRes = await apiGet('getTeams')
+        const teamList = (teamsRes.teams || []).filter((t) => t !== '管理人')
+        setTeams(teamList)
+        loadAllTeamVideos(teamList)
+      } else {
+        setTeamError(res.message || '追加に失敗しました')
+      }
+    } catch {
+      setTeamError('追加に失敗しました。時間をおいて再度お試しください')
+    } finally {
+      setTeamSubmitting(false)
+    }
   }
 
   async function handleAddMember(e) {
@@ -383,6 +421,41 @@ export default function Admin() {
 
         <button className="btn-primary" type="submit" disabled={memberSubmitting}>
           {memberSubmitting ? '追加中…' : 'メンバーを追加'}
+        </button>
+      </form>
+
+      <div style={{ height: '1px', background: 'var(--line)', margin: '2.5rem 0' }} />
+
+      <h1 className="admin-heading" style={{ marginBottom: '1.2rem' }}>チームを追加</h1>
+
+      <form className="admin-form" onSubmit={handleAddTeam}>
+        <div>
+          <label className="field-label">チーム名</label>
+          <input
+            className="field-input"
+            type="text"
+            value={newTeamName}
+            onChange={(e) => setNewTeamName(e.target.value)}
+            placeholder="例）名古屋チーム"
+          />
+        </div>
+
+        <div>
+          <label className="field-label">パスワード</label>
+          <input
+            className="field-input"
+            type="text"
+            value={newTeamPassword}
+            onChange={(e) => setNewTeamPassword(e.target.value)}
+            placeholder="このチーム用のパスワード"
+          />
+        </div>
+
+        {teamError && <p className="error-text">{teamError}</p>}
+        {teamMessage && <p className="success-banner">{teamMessage}</p>}
+
+        <button className="btn-primary" type="submit" disabled={teamSubmitting}>
+          {teamSubmitting ? '追加中…' : 'チームを追加'}
         </button>
       </form>
     </div>
