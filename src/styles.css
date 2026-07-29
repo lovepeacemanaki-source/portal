@@ -1,8 +1,19 @@
 :root {
---bg: #042167;
+  --bg: #042167;
   --bg-deep: #021640;
   --surface: #0a2f7a;
   --surface-hover: #0e3890;
+  --text: #fffef9;
+  --text-dim: rgba(255, 254, 249, 0.66);
+  --text-faint: rgba(255, 254, 249, 0.4);
+  --accent-gold: #f0b429;
+  --accent-rose: #e88ca5;
+  --line: rgba(255, 254, 249, 0.14);
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 8px;
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Work Sans', sans-serif;
 }
 
 * {
@@ -115,16 +126,6 @@ button {
   color: var(--accent-rose);
   font-size: 0.88rem;
   margin-top: 0.6rem;
-}
-
-/* ---------- constellation backdrop ---------- */
-
-.constellation-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.5;
 }
 
 /* ---------- login ---------- */
