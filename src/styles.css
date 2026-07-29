@@ -430,6 +430,40 @@ button {
   margin: 0;
 }
 
+.team-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.team-overview-row {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.2rem;
+}
+
+.team-overview-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.team-overview-videos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.team-overview-chip {
+  background: rgba(255, 254, 249, 0.08);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
 .success-banner {
   background: rgba(171, 181, 246, 0.14);
   border: 1px solid rgba(171, 181, 246, 0.4);
