@@ -68,11 +68,11 @@ export default function VideoList() {
 
   return (
     <div className="page">
-      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+      <div style={{ textAlign: 'center', marginTop: '-2.5rem', marginBottom: '1.5rem' }}>
         <img
           src="/login-logo.png"
           alt="LOVE AND PEACE"
-          style={{ width: '100px', height: '100px', objectFit: 'contain' }}
+          style={{ width: '200px', height: '200px', objectFit: 'contain' }}
         />
       </div>
 
