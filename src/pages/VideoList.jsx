@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { apiGet } from '../config.js'
+import { useNavigate } from 'react-router-dom'
+import { apiGet, apiPost } from '../config.js'
 
 export default function VideoList() {
   const navigate = useNavigate()
@@ -8,6 +8,12 @@ export default function VideoList() {
   const [loading, setLoading] = useState(true)
   const team = localStorage.getItem('lp_team')
   const member = localStorage.getItem('lp_member')
+
+  const [expandedId, setExpandedId] = useState(null)
+  const [feedbackByVideo, setFeedbackByVideo] = useState({})
+  const [commentDrafts, setCommentDrafts] = useState({})
+  const [submittingId, setSubmittingId] = useState(null)
+  const [feedbackError, setFeedbackError] = useState('')
 
   useEffect(() => {
     if (!team || !member) {
@@ -26,12 +32,53 @@ export default function VideoList() {
     navigate('/')
   }
 
+  function toggleExpand(video) {
+    if (expandedId === video.videoID) {
+      setExpandedId(null)
+      return
+    }
+    setExpandedId(video.videoID)
+    setFeedbackError('')
+    if (!feedbackByVideo[video.videoID]) {
+      loadFeedback(video.videoID)
+    }
+  }
+
+  function loadFeedback(videoID) {
+    apiGet('getFeedback', { videoID }).then((res) => {
+      setFeedbackByVideo((prev) => ({ ...prev, [videoID]: res.feedback || [] }))
+    })
+  }
+
+  async function handleSubmitFeedback(videoID) {
+    const comment = (commentDrafts[videoID] || '').trim()
+    if (!comment) return
+    setSubmittingId(videoID)
+    setFeedbackError('')
+    try {
+      await apiPost('postFeedback', { videoID, name: member, comment })
+      setCommentDrafts((prev) => ({ ...prev, [videoID]: '' }))
+      loadFeedback(videoID)
+    } catch {
+      setFeedbackError('送信に失敗しました。時間をおいて再度お試しください')
+    } finally {
+      setSubmittingId(null)
+    }
+  }
+
   return (
     <div className="page">
       <div className="page-header">
-        <div>
-          <h1>動画一覧</h1>
-          <div className="team-tag">{team} ・ {member} さん</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
+          <img
+            src="/login-logo.png"
+            alt="LOVE AND PEACE"
+            style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+          />
+          <div>
+            <h1>動画一覧</h1>
+            <div className="team-tag">{team} ・ {member} さん</div>
+          </div>
         </div>
         <button className="btn-ghost" onClick={handleLogout}>
           ログアウト
@@ -45,18 +92,81 @@ export default function VideoList() {
       )}
 
       {!loading && videos.length > 0 && (
-        <div className="video-grid">
-          {videos.map((v) => (
-            <Link
-              key={v.videoID}
-              to={`/videos/${v.videoID}`}
-              state={{ video: v }}
-              className="video-card"
-            >
-              <p className="video-card-title">{v.title}</p>
-              <p className="video-card-date">{formatDate(v.postedDate)}</p>
-            </Link>
-          ))}
+        <div className="video-list-vertical">
+          {videos.map((v) => {
+            const isOpen = expandedId === v.videoID
+            const embedUrl = isOpen ? toEmbedUrl(v.url) : null
+            const feedback = feedbackByVideo[v.videoID] || []
+
+            return (
+              <div key={v.videoID} className="video-row">
+                <button
+                  type="button"
+                  className="video-row-header"
+                  onClick={() => toggleExpand(v)}
+                >
+                  <span className="video-row-title">{v.title}</span>
+                  <span className="video-row-date">{formatDate(v.postedDate)}</span>
+                </button>
+
+                {isOpen && (
+                  <div className="video-row-expanded">
+                    {v.description && <p className="video-row-desc">{v.description}</p>}
+
+                    {embedUrl && (
+                      <div className="video-frame-wrap">
+                        <iframe
+                          src={embedUrl}
+                          title={v.title}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    )}
+
+                    <div className="feedback-section">
+                      <h2>フィードバック</h2>
+
+                      <div className="feedback-list">
+                        {feedback.length === 0 && (
+                          <p className="team-tag">まだフィードバックがありません</p>
+                        )}
+                        {feedback.map((f) => (
+                          <div key={f.feedbackID} className="feedback-item">
+                            <div className="feedback-item-name">{f.name}</div>
+                            <div className="feedback-item-text">{f.comment}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="feedback-form">
+                        <p className="feedback-poster">投稿者: {member}</p>
+                        <textarea
+                          value={commentDrafts[v.videoID] || ''}
+                          onChange={(e) =>
+                            setCommentDrafts((prev) => ({
+                              ...prev,
+                              [v.videoID]: e.target.value,
+                            }))
+                          }
+                          placeholder="感想やコメントを書いてください"
+                        />
+                        {feedbackError && <p className="error-text">{feedbackError}</p>}
+                        <button
+                          className="btn-primary"
+                          type="button"
+                          disabled={submittingId === v.videoID}
+                          onClick={() => handleSubmitFeedback(v.videoID)}
+                        >
+                          {submittingId === v.videoID ? '送信中…' : '投稿する'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
@@ -68,4 +178,24 @@ function formatDate(value) {
   const d = new Date(value)
   if (isNaN(d)) return String(value)
   return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
+}
+
+// YouTubeの通常URL／短縮URLを埋め込み用URLに変換する
+function toEmbedUrl(url) {
+  if (!url) return null
+  try {
+    const u = new URL(url)
+    let id = ''
+    if (u.hostname.includes('youtu.be')) {
+      id = u.pathname.slice(1)
+    } else if (u.searchParams.get('v')) {
+      id = u.searchParams.get('v')
+    } else if (u.pathname.includes('/embed/')) {
+      return url
+    }
+    if (!id) return null
+    return `https://www.youtube.com/embed/${id}`
+  } catch {
+    return null
+  }
 }
