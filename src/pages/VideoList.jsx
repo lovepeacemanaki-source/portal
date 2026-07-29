@@ -134,7 +134,12 @@ export default function VideoList() {
                         )}
                         {feedback.map((f) => (
                           <div key={f.feedbackID} className="feedback-item">
-                            <div className="feedback-item-name">{f.name}</div>
+                            <div className="feedback-item-name">
+                              {f.name}
+                              <span className="feedback-item-date">
+                                {formatDate(f.postedAt)}
+                              </span>
+                            </div>
                             <div className="feedback-item-text">{f.comment}</div>
                           </div>
                         ))}
