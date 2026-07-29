@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { apiGet, apiPost } from '../config.js'
 
 export default function Admin() {
-  const [authed, setAuthed] = useState(false)
+  const [authed, setAuthed] = useState(
+    () => localStorage.getItem('lp_admin') === 'true'
+  )
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
   const [checking, setChecking] = useState(false)
@@ -29,6 +31,7 @@ export default function Admin() {
     try {
       const res = await apiGet('login', { team: 'admin', password: password.trim() })
       if (res.success) {
+        localStorage.setItem('lp_admin', 'true')
         setAuthed(true)
       } else {
         setAuthError('パスワードが違います')
