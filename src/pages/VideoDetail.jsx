@@ -61,7 +61,13 @@ export default function VideoDetail() {
         ← 動画一覧に戻る
       </Link>
 
-      {video && <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.5rem', margin: '0 0 1.2rem' }}>{video.title}</h1>}
+      {video && <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.5rem', margin: '0 0 0.8rem' }}>{video.title}</h1>}
+
+      {video?.description && (
+        <p style={{ color: 'var(--text-dim)', lineHeight: 1.7, marginBottom: '1.5rem', whiteSpace: 'pre-wrap' }}>
+          {video.description}
+        </p>
+      )}
 
       {embedUrl && (
         <div className="video-frame-wrap">
