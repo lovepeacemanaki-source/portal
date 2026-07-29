@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiGet } from '../config.js'
 import ConstellationBg from '../components/ConstellationBg.jsx'
@@ -6,12 +6,20 @@ import ConstellationBg from '../components/ConstellationBg.jsx'
 export default function Login() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1) // 1: チーム+パスワード, 2: 名前選択
+  const [teams, setTeams] = useState([])
   const [team, setTeam] = useState('')
   const [password, setPassword] = useState('')
   const [members, setMembers] = useState([])
   const [selectedMember, setSelectedMember] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    apiGet('getTeams').then((res) => {
+      // 管理画面用の "admin" はログイン画面の選択肢からは除外
+      setTeams((res.teams || []).filter((t) => t !== 'admin'))
+    })
+  }, [])
 
   async function handleTeamSubmit(e) {
     e.preventDefault()
@@ -60,13 +68,18 @@ export default function Login() {
           <form className="login-form" onSubmit={handleTeamSubmit}>
             <div>
               <label className="field-label">チーム名</label>
-              <input
+              <select
                 className="field-input"
-                type="text"
                 value={team}
                 onChange={(e) => setTeam(e.target.value)}
-                placeholder="例）関西チーム"
-              />
+              >
+                <option value="">選択してください</option>
+                {teams.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="field-label">パスワード</label>
