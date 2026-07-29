@@ -198,8 +198,8 @@ export default function Admin() {
 
   return (
     <div className="page">
-      <div className="page-header">
-        <h1>動画を追加</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '2.2rem' }}>
+        <h1 className="admin-heading">動画を追加</h1>
         <button className="btn-ghost" onClick={handleLogout}>
           ログアウト
         </button>
@@ -298,7 +298,7 @@ export default function Admin() {
 
       <div style={{ height: '1px', background: 'var(--line)', margin: '2.5rem 0' }} />
 
-      <h1 style={{ marginBottom: '1.2rem' }}>メンバーを追加</h1>
+      <h1 className="admin-heading" style={{ marginBottom: '1.2rem' }}>メンバーを追加</h1>
 
       <form className="admin-form" onSubmit={handleAddMember}>
         <div>
