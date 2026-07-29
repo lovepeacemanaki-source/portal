@@ -374,6 +374,13 @@ button {
   margin-bottom: 0.3rem;
 }
 
+.feedback-item-date {
+  color: var(--text-faint);
+  font-weight: 400;
+  font-size: 0.78rem;
+  margin-left: 0.6rem;
+}
+
 .feedback-item-text {
   font-size: 0.95rem;
   line-height: 1.6;
