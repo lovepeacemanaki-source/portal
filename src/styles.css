@@ -436,10 +436,20 @@ button {
   gap: 0.9rem;
 }
 
+.team-overview-chip {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 254, 249, 0.08);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
 .team-overview-chip-date {
   color: var(--text-faint);
   font-size: 0.74rem;
-  margin-left: 0.5rem;
 }
 
 .team-overview-row {
