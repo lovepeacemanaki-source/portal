@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiGet } from '../config.js'
-import ConstellationBg from '../components/ConstellationBg.jsx'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -62,13 +61,17 @@ export default function Login() {
 
   return (
     <div className="login-screen">
-      <ConstellationBg />
       <div className="login-card">
         <img
-  src="/login-logo.png"
-  alt="LOVE AND PEACE ポータルサイト"
-  style={{ width: '100%', maxWidth: '320px', marginBottom: '2rem' }}
-/>
+          src="/login-logo.png"
+          alt="LOVE AND PEACE ポータルサイト"
+          style={{
+            display: 'block',
+            width: '260px',
+            height: 'auto',
+            margin: '0 auto 2rem',
+          }}
+        />
 
         {step === 1 && (
           <form className="login-form" onSubmit={handleTeamSubmit}>
