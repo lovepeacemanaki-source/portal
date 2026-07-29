@@ -271,9 +271,10 @@ export default function Admin() {
               {(allTeamVideos[t] || []).length === 0 ? (
                 <span className="team-tag">動画なし</span>
               ) : (
-                allTeamVideos[t].map((v) => (
+              allTeamVideos[t].map((v) => (
                   <span key={v.videoID} className="team-overview-chip">
                     {v.title}
+                    <span className="team-overview-chip-date">{formatDate(v.postedDate)}</span>
                   </span>
                 ))
               )}
@@ -460,4 +461,10 @@ export default function Admin() {
       </form>
     </div>
   )
+}
+function formatDate(value) {
+  if (!value) return ''
+  const d = new Date(value)
+  if (isNaN(d)) return String(value)
+  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
 }
