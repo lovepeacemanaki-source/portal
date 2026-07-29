@@ -28,15 +28,21 @@ export default function Login() {
     }
     setLoading(true)
     try {
-      const res = await apiGet('login', { team: team.trim(), password: password.trim() })
-      if (res.success) {
-        if (team.trim() === '管理人') {
+      if (team.trim() === '管理人') {
+        const res = await apiGet('login', { team: team.trim(), password: password.trim() })
+        if (res.success) {
           localStorage.setItem('lp_admin', 'true')
           navigate('/admin')
           return
         }
-        const membersRes = await apiGet('getMembers', { team: team.trim() })
-        setMembers(membersRes.members || [])
+        setError(res.message || 'ログインに失敗しました')
+        setLoading(false)
+        return
+      }
+
+      const res = await apiGet('loginWithMembers', { team: team.trim(), password: password.trim() })
+      if (res.success) {
+        setMembers(res.members || [])
         setStep(2)
       } else {
         setError(res.message || 'ログインに失敗しました')
