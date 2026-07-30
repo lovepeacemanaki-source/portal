@@ -7,7 +7,7 @@
   --text-dim: rgba(255, 254, 249, 0.66);
   --text-faint: rgba(255, 254, 249, 0.4);
   --accent-gold: #f0b429;
-  --accent-btn: #abb5f6;
+  --accent-btn: #ddfaff;
   --accent-rose: #e88ca5;
   --line: rgba(255, 254, 249, 0.14);
   --radius-lg: 20px;
@@ -72,7 +72,7 @@ button {
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(171, 181, 246, 0.35);
+  box-shadow: 0 8px 24px rgba(221, 250, 255, 0.35);
 }
 
 .btn-primary:disabled {
@@ -127,6 +127,16 @@ button {
   color: var(--accent-rose);
   font-size: 0.88rem;
   margin-top: 0.6rem;
+}
+
+/* ---------- constellation backdrop ---------- */
+
+.constellation-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 /* ---------- login ---------- */
@@ -436,22 +446,6 @@ button {
   gap: 0.9rem;
 }
 
-.team-overview-chip {
-  display: flex;
-  flex-direction: column;
-  background: rgba(255, 254, 249, 0.08);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 0.4rem 0.85rem;
-  font-size: 0.82rem;
-  color: var(--text-dim);
-}
-
-.team-overview-chip-date {
-  color: var(--text-faint);
-  font-size: 0.74rem;
-}
-
 .team-overview-row {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -472,17 +466,24 @@ button {
 }
 
 .team-overview-chip {
+  display: flex;
+  flex-direction: column;
   background: rgba(255, 254, 249, 0.08);
   border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 0.3rem 0.85rem;
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.85rem;
   font-size: 0.82rem;
   color: var(--text-dim);
 }
 
+.team-overview-chip-date {
+  color: var(--text-faint);
+  font-size: 0.74rem;
+}
+
 .success-banner {
-  background: rgba(171, 181, 246, 0.14);
-  border: 1px solid rgba(171, 181, 246, 0.4);
+  background: rgba(221, 250, 255, 0.14);
+  border: 1px solid rgba(221, 250, 255, 0.4);
   color: var(--accent-btn);
   border-radius: var(--radius-sm);
   padding: 0.8rem 1rem;
