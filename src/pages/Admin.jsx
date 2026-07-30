@@ -38,7 +38,6 @@ export default function Admin() {
   const [teamMessage, setTeamMessage] = useState('')
   const [teamError, setTeamError] = useState('')
 
-  const [fbTeam, setFbTeam] = useState('')
   const [fbVideoId, setFbVideoId] = useState('')
   const [fbFeedback, setFbFeedback] = useState([])
   const [fbLoading, setFbLoading] = useState(false)
@@ -129,6 +128,17 @@ export default function Admin() {
     } finally {
       setFbReplySubmittingId(null)
     }
+  }
+
+  function toggleFbVideo(videoID) {
+    if (fbVideoId === videoID) {
+      setFbVideoId('')
+      setFbFeedback([])
+      return
+    }
+    setFbVideoId(videoID)
+    setFbReplyingId(null)
+    loadFbFeedback(videoID)
   }
 
   async function handleAddTeam(e) {
@@ -313,131 +323,91 @@ export default function Admin() {
                 <span className="team-tag">動画なし</span>
               ) : (
                 allTeamVideos[t].map((v) => (
-                  <span key={v.videoID} className="team-overview-chip">
+                  <button
+                    type="button"
+                    key={v.videoID}
+                    className="team-overview-chip"
+                    onClick={() => toggleFbVideo(v.videoID)}
+                    style={{
+                      borderColor: fbVideoId === v.videoID ? 'var(--accent-btn)' : 'var(--line)',
+                    }}
+                  >
                     <span className="team-overview-chip-date">{formatDate(v.postedDate)}</span>
                     {v.title}
-                  </span>
+                  </button>
                 ))
               )}
             </div>
+
+            {(allTeamVideos[t] || []).some((v) => v.videoID === fbVideoId) && (
+              <div className="feedback-list" style={{ marginTop: '1rem' }}>
+                {fbLoading && <p className="team-tag">読み込み中…</p>}
+                {!fbLoading && fbFeedback.length === 0 && (
+                  <p className="team-tag">まだフィードバックがありません</p>
+                )}
+                {!fbLoading &&
+                  fbFeedback
+                    .filter((f) => !f.replyTo)
+                    .map((f) => {
+                      const replies = fbFeedback.filter((r) => r.replyTo === f.feedbackID)
+                      return (
+                        <div key={f.feedbackID} className="feedback-item">
+                          <div className="feedback-item-name">
+                            {f.name}
+                            <span className="feedback-item-date">{formatDate(f.postedAt)}</span>
+                          </div>
+                          <div className="feedback-item-text">{f.comment}</div>
+                          <button
+                            type="button"
+                            className="feedback-reply-btn"
+                            onClick={() =>
+                              setFbReplyingId(fbReplyingId === f.feedbackID ? null : f.feedbackID)
+                            }
+                          >
+                            返信
+                          </button>
+
+                          {replies.map((r) => (
+                            <div key={r.feedbackID} className="feedback-reply">
+                              <div className="feedback-item-name">
+                                {r.name}
+                                <span className="feedback-item-date">{formatDate(r.postedAt)}</span>
+                              </div>
+                              <div className="feedback-item-text">{r.comment}</div>
+                            </div>
+                          ))}
+
+                          {fbReplyingId === f.feedbackID && (
+                            <div className="feedback-reply-form">
+                              <textarea
+                                value={fbReplyDrafts[f.feedbackID] || ''}
+                                onChange={(e) =>
+                                  setFbReplyDrafts((prev) => ({
+                                    ...prev,
+                                    [f.feedbackID]: e.target.value,
+                                  }))
+                                }
+                                placeholder={`${f.name}さんへ返信（${ADMIN_REPLY_NAME}として投稿）`}
+                              />
+                              {fbError && <p className="error-text">{fbError}</p>}
+                              <button
+                                className="btn-primary"
+                                type="button"
+                                disabled={fbReplySubmittingId === f.feedbackID}
+                                onClick={() => handleFbReply(fbVideoId, f.feedbackID)}
+                              >
+                                {fbReplySubmittingId === f.feedbackID ? '送信中…' : '返信する'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+              </div>
+            )}
           </div>
         ))}
       </div>
-
-      <div style={{ height: '1px', background: 'var(--line)', margin: '2.5rem 0' }} />
-
-      <h1 className="admin-heading" style={{ marginBottom: '1.5rem' }}>フィードバックを見る・返信する</h1>
-
-      <div className="admin-form" style={{ marginBottom: '1.5rem' }}>
-        <div>
-          <label className="field-label">チーム</label>
-          <select
-            className="field-input"
-            value={fbTeam}
-            onChange={(e) => {
-              setFbTeam(e.target.value)
-              setFbVideoId('')
-              setFbFeedback([])
-            }}
-          >
-            <option value="">選択してください</option>
-            {teams.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {fbTeam && (
-          <div>
-            <label className="field-label">動画</label>
-            <select
-              className="field-input"
-              value={fbVideoId}
-              onChange={(e) => {
-                setFbVideoId(e.target.value)
-                if (e.target.value) loadFbFeedback(e.target.value)
-                else setFbFeedback([])
-              }}
-            >
-              <option value="">選択してください</option>
-              {(allTeamVideos[fbTeam] || []).map((v) => (
-                <option key={v.videoID} value={v.videoID}>
-                  {v.title}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-      </div>
-
-      {fbVideoId && (
-        <div className="feedback-list" style={{ marginBottom: '1rem' }}>
-          {fbLoading && <p className="team-tag">読み込み中…</p>}
-          {!fbLoading && fbFeedback.length === 0 && (
-            <p className="team-tag">まだフィードバックがありません</p>
-          )}
-          {!fbLoading &&
-            fbFeedback
-              .filter((f) => !f.replyTo)
-              .map((f) => {
-                const replies = fbFeedback.filter((r) => r.replyTo === f.feedbackID)
-                return (
-                  <div key={f.feedbackID} className="feedback-item">
-                    <div className="feedback-item-name">
-                      {f.name}
-                      <span className="feedback-item-date">{formatDate(f.postedAt)}</span>
-                    </div>
-                    <div className="feedback-item-text">{f.comment}</div>
-                    <button
-                      type="button"
-                      className="feedback-reply-btn"
-                      onClick={() =>
-                        setFbReplyingId(fbReplyingId === f.feedbackID ? null : f.feedbackID)
-                      }
-                    >
-                      返信
-                    </button>
-
-                    {replies.map((r) => (
-                      <div key={r.feedbackID} className="feedback-reply">
-                        <div className="feedback-item-name">
-                          {r.name}
-                          <span className="feedback-item-date">{formatDate(r.postedAt)}</span>
-                        </div>
-                        <div className="feedback-item-text">{r.comment}</div>
-                      </div>
-                    ))}
-
-                    {fbReplyingId === f.feedbackID && (
-                      <div className="feedback-reply-form">
-                        <textarea
-                          value={fbReplyDrafts[f.feedbackID] || ''}
-                          onChange={(e) =>
-                            setFbReplyDrafts((prev) => ({
-                              ...prev,
-                              [f.feedbackID]: e.target.value,
-                            }))
-                          }
-                          placeholder={`${f.name}さんへ返信（${ADMIN_REPLY_NAME}として投稿）`}
-                        />
-                        {fbError && <p className="error-text">{fbError}</p>}
-                        <button
-                          className="btn-primary"
-                          type="button"
-                          disabled={fbReplySubmittingId === f.feedbackID}
-                          onClick={() => handleFbReply(fbVideoId, f.feedbackID)}
-                        >
-                          {fbReplySubmittingId === f.feedbackID ? '送信中…' : '返信する'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-        </div>
-      )}
 
       <div style={{ height: '1px', background: 'var(--line)', margin: '2.5rem 0' }} />
 
