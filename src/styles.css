@@ -521,12 +521,14 @@ button {
 .team-overview-chip {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   background: rgba(255, 254, 249, 0.08);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   padding: 0.4rem 0.85rem;
   font-size: 0.82rem;
   color: var(--text-dim);
+  transition: border-color 0.15s ease;
 }
 
 .team-overview-chip-date {
