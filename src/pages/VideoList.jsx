@@ -14,6 +14,9 @@ export default function VideoList() {
   const [commentDrafts, setCommentDrafts] = useState({})
   const [submittingId, setSubmittingId] = useState(null)
   const [feedbackError, setFeedbackError] = useState('')
+  const [replyingId, setReplyingId] = useState(null)
+  const [replyDrafts, setReplyDrafts] = useState({})
+  const [replySubmittingId, setReplySubmittingId] = useState(null)
   const rowRefs = useRef({})
 
   useEffect(() => {
@@ -73,6 +76,23 @@ export default function VideoList() {
       setFeedbackError('送信に失敗しました。時間をおいて再度お試しください')
     } finally {
       setSubmittingId(null)
+    }
+  }
+
+  async function handleSubmitReply(videoID, parentId) {
+    const comment = (replyDrafts[parentId] || '').trim()
+    if (!comment) return
+    setReplySubmittingId(parentId)
+    setFeedbackError('')
+    try {
+      await apiPost('postFeedback', { videoID, name: member, comment, replyTo: parentId })
+      setReplyDrafts((prev) => ({ ...prev, [parentId]: '' }))
+      setReplyingId(null)
+      loadFeedback(videoID)
+    } catch {
+      setFeedbackError('送信に失敗しました。時間をおいて再度お試しください')
+    } finally {
+      setReplySubmittingId(null)
     }
   }
 
@@ -160,17 +180,66 @@ export default function VideoList() {
                         {feedback.length === 0 && (
                           <p className="team-tag">まだフィードバックがありません</p>
                         )}
-                        {feedback.map((f) => (
-                          <div key={f.feedbackID} className="feedback-item">
-                            <div className="feedback-item-name">
-                              {f.name}
-                              <span className="feedback-item-date">
-                                {formatDate(f.postedAt)}
-                              </span>
-                            </div>
-                            <div className="feedback-item-text">{f.comment}</div>
-                          </div>
-                        ))}
+                        {feedback
+                          .filter((f) => !f.replyTo)
+                          .map((f) => {
+                            const replies = feedback.filter((r) => r.replyTo === f.feedbackID)
+                            return (
+                              <div key={f.feedbackID} className="feedback-item">
+                                <div className="feedback-item-name">
+                                  {f.name}
+                                  <span className="feedback-item-date">
+                                    {formatDate(f.postedAt)}
+                                  </span>
+                                </div>
+                                <div className="feedback-item-text">{f.comment}</div>
+                                <button
+                                  type="button"
+                                  className="feedback-reply-btn"
+                                  onClick={() =>
+                                    setReplyingId(replyingId === f.feedbackID ? null : f.feedbackID)
+                                  }
+                                >
+                                  返信
+                                </button>
+
+                                {replies.map((r) => (
+                                  <div key={r.feedbackID} className="feedback-reply">
+                                    <div className="feedback-item-name">
+                                      {r.name}
+                                      <span className="feedback-item-date">
+                                        {formatDate(r.postedAt)}
+                                      </span>
+                                    </div>
+                                    <div className="feedback-item-text">{r.comment}</div>
+                                  </div>
+                                ))}
+
+                                {replyingId === f.feedbackID && (
+                                  <div className="feedback-reply-form">
+                                    <textarea
+                                      value={replyDrafts[f.feedbackID] || ''}
+                                      onChange={(e) =>
+                                        setReplyDrafts((prev) => ({
+                                          ...prev,
+                                          [f.feedbackID]: e.target.value,
+                                        }))
+                                      }
+                                      placeholder={`${f.name}さんへ返信`}
+                                    />
+                                    <button
+                                      className="btn-primary"
+                                      type="button"
+                                      disabled={replySubmittingId === f.feedbackID}
+                                      onClick={() => handleSubmitReply(v.videoID, f.feedbackID)}
+                                    >
+                                      {replySubmittingId === f.feedbackID ? '送信中…' : '返信する'}
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
                       </div>
 
                       <div className="feedback-form">
