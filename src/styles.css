@@ -267,6 +267,12 @@ button {
   background: var(--surface-hover);
 }
 
+.video-row-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
 .video-row-title {
   font-family: var(--font-display);
   font-size: 1.05rem;
