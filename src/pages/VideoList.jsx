@@ -122,7 +122,19 @@ export default function VideoList() {
                   className="video-row-header"
                   onClick={() => toggleExpand(v)}
                 >
-                  <span className="video-row-title">{v.title}</span>
+                  <span className="video-row-title-wrap">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      style={{ flexShrink: 0 }}
+                    >
+                      <circle cx="12" cy="12" r="9.5" stroke="var(--accent-btn)" strokeWidth="1.5" />
+                      <path d="M10 8.5L16 12L10 15.5V8.5Z" fill="var(--accent-btn)" />
+                    </svg>
+                    <span className="video-row-title">{v.title}</span>
+                  </span>
                   <span className="video-row-date">{formatDate(v.postedDate)}</span>
                 </button>
 
