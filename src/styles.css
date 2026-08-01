@@ -8,6 +8,8 @@
   --text-faint: rgba(255, 254, 249, 0.4);
   --accent-gold: #f0b429;
   --accent-btn: #ddfaff;
+  --accent-btn-rgb: 221, 250, 255;
+  --btn-text: var(--bg-deep);
   --accent-standout: #ddfaff;
   --accent-standout-rgb: 221, 250, 255;
   --accent-rose: #e88ca5;
@@ -20,9 +22,9 @@
   --font-body: 'Work Sans', sans-serif;
 }
 
-/* 管理画面専用テーマ(白背景・紺文字) */
+/* 管理画面専用テーマ(ほんのり水色がかった白背景・紺文字) */
 body.admin-theme {
-  --bg: #ffffff;
+  --bg: #f5fcff;
   --text: #042167;
   --text-dim: rgba(4, 33, 103, 0.66);
   --text-faint: rgba(4, 33, 103, 0.4);
@@ -30,6 +32,9 @@ body.admin-theme {
   --field-bg: rgba(4, 33, 103, 0.045);
   --accent-standout: #2f5dff;
   --accent-standout-rgb: 47, 93, 255;
+  --accent-btn: #2f5dff;
+  --accent-btn-rgb: 47, 93, 255;
+  --btn-text: #ffffff;
 }
 
 * {
@@ -76,7 +81,7 @@ button {
 
 .btn-primary {
   background: var(--accent-btn);
-  color: var(--bg-deep);
+  color: var(--btn-text);
   border: none;
   border-radius: 12px;
   padding: 0.85rem 1.8rem;
@@ -87,7 +92,7 @@ button {
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(221, 250, 255, 0.35);
+  box-shadow: 0 8px 24px rgba(var(--accent-btn-rgb), 0.35);
 }
 
 .btn-primary:disabled {
