@@ -55,12 +55,14 @@ export default function Admin() {
   const [memberTeam, setMemberTeam] = useState('')
   const [memberName, setMemberName] = useState('')
   const [teamMembers, setTeamMembers] = useState([])
+  const [editingMemberId, setEditingMemberId] = useState(null)
   const [memberSubmitting, setMemberSubmitting] = useState(false)
   const [memberMessage, setMemberMessage] = useState('')
   const [memberError, setMemberError] = useState('')
 
   const [newTeamName, setNewTeamName] = useState('')
   const [newTeamPassword, setNewTeamPassword] = useState('')
+  const [editingTeamOriginal, setEditingTeamOriginal] = useState(null)
   const [teamSubmitting, setTeamSubmitting] = useState(false)
   const [teamMessage, setTeamMessage] = useState('')
   const [teamError, setTeamError] = useState('')
@@ -128,6 +130,8 @@ export default function Admin() {
     } else {
       setTeamMembers([])
     }
+    setEditingMemberId(null)
+    setMemberName('')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memberTeam])
 
@@ -188,6 +192,27 @@ export default function Admin() {
     }
     setTeamSubmitting(true)
     try {
+      if (editingTeamOriginal) {
+        const res = await apiPost('updateTeam', {
+          originalName: editingTeamOriginal,
+          teamName: newTeamName.trim(),
+          password: newTeamPassword.trim(),
+        })
+        if (res.success) {
+          setTeamMessage(`「${newTeamName.trim()}」を更新しました`)
+          setEditingTeamOriginal(null)
+          setNewTeamName('')
+          setNewTeamPassword('')
+          const teamsRes = await apiGet('getTeams')
+          const teamList = (teamsRes.teams || []).filter((t) => t !== '管理人')
+          setTeams(teamList)
+          loadAllTeamVideos(teamList)
+        } else {
+          setTeamError(res.message || '更新に失敗しました')
+        }
+        return
+      }
+
       const res = await apiPost('postTeam', {
         teamName: newTeamName.trim(),
         password: newTeamPassword.trim(),
@@ -204,10 +229,25 @@ export default function Admin() {
         setTeamError(res.message || '追加に失敗しました')
       }
     } catch {
-      setTeamError('追加に失敗しました。時間をおいて再度お試しください')
+      setTeamError('保存に失敗しました。時間をおいて再度お試しください')
     } finally {
       setTeamSubmitting(false)
     }
+  }
+
+  function startEditTeam(teamName) {
+    setEditingTeamOriginal(teamName)
+    setNewTeamName(teamName)
+    setNewTeamPassword('')
+    setTeamMessage('')
+    setTeamError('')
+  }
+
+  function cancelEditTeam() {
+    setEditingTeamOriginal(null)
+    setNewTeamName('')
+    setNewTeamPassword('')
+    setTeamError('')
   }
 
   async function handleAddMember(e) {
@@ -220,15 +260,34 @@ export default function Admin() {
     }
     setMemberSubmitting(true)
     try {
-      await apiPost('postMember', { team: memberTeam, name: memberName.trim() })
-      setMemberMessage(`「${memberName.trim()}」を${memberTeam}に追加しました`)
+      if (editingMemberId) {
+        await apiPost('updateMember', { memberID: editingMemberId, name: memberName.trim() })
+        setMemberMessage(`「${memberName.trim()}」に更新しました`)
+        setEditingMemberId(null)
+      } else {
+        await apiPost('postMember', { team: memberTeam, name: memberName.trim() })
+        setMemberMessage(`「${memberName.trim()}」を${memberTeam}に追加しました`)
+      }
       setMemberName('')
       loadTeamMembers()
     } catch {
-      setMemberError('追加に失敗しました。時間をおいて再度お試しください')
+      setMemberError('保存に失敗しました。時間をおいて再度お試しください')
     } finally {
       setMemberSubmitting(false)
     }
+  }
+
+  function startEditMember(member) {
+    setEditingMemberId(member.memberID)
+    setMemberName(member.name)
+    setMemberMessage('')
+    setMemberError('')
+  }
+
+  function cancelEditMember() {
+    setEditingMemberId(null)
+    setMemberName('')
+    setMemberError('')
   }
 
   async function handleAuth(e) {
@@ -579,7 +638,7 @@ export default function Admin() {
         </form>
       </AdminCard>
 
-      <AdminCard title="メンバーを追加">
+      <AdminCard title="メンバーを追加・編集">
         <form className="admin-form" onSubmit={handleAddMember}>
           <div>
             <label className="field-label">チーム</label>
@@ -599,8 +658,25 @@ export default function Admin() {
 
           {memberTeam && teamMembers.length > 0 && (
             <div>
-              <label className="field-label">{memberTeam}の現在のメンバー</label>
-              <p className="team-tag">{teamMembers.map((m) => m.name).join('、')}</p>
+              <label className="field-label">{memberTeam}の現在のメンバー（クリックで編集）</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {teamMembers.map((m) => (
+                  <button
+                    type="button"
+                    key={m.memberID}
+                    onClick={() => startEditMember(m)}
+                    className="btn-ghost"
+                    style={{
+                      textAlign: 'left',
+                      borderRadius: 'var(--radius-sm)',
+                      borderColor:
+                        editingMemberId === m.memberID ? 'var(--accent-standout)' : 'var(--line)',
+                    }}
+                  >
+                    {m.name}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -618,14 +694,45 @@ export default function Admin() {
           {memberError && <p className="error-text">{memberError}</p>}
           {memberMessage && <p className="success-banner">{memberMessage}</p>}
 
-          <button className="btn-primary" type="submit" disabled={memberSubmitting}>
-            {memberSubmitting ? '追加中…' : 'メンバーを追加'}
-          </button>
+          <div style={{ display: 'flex', gap: '0.8rem' }}>
+            <button className="btn-primary" type="submit" disabled={memberSubmitting}>
+              {memberSubmitting ? '保存中…' : editingMemberId ? '更新する' : 'メンバーを追加'}
+            </button>
+            {editingMemberId && (
+              <button type="button" className="btn-ghost" onClick={cancelEditMember}>
+                キャンセル
+              </button>
+            )}
+          </div>
         </form>
       </AdminCard>
 
-      <AdminCard title="チームを追加">
+      <AdminCard title="チームを追加・編集">
         <form className="admin-form" onSubmit={handleAddTeam}>
+          {teams.length > 0 && (
+            <div>
+              <label className="field-label">既存のチーム（クリックで編集）</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {teams.map((t) => (
+                  <button
+                    type="button"
+                    key={t}
+                    onClick={() => startEditTeam(t)}
+                    className="btn-ghost"
+                    style={{
+                      textAlign: 'left',
+                      borderRadius: 'var(--radius-sm)',
+                      borderColor:
+                        editingTeamOriginal === t ? 'var(--accent-standout)' : 'var(--line)',
+                    }}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="field-label">チーム名</label>
             <input
@@ -638,7 +745,9 @@ export default function Admin() {
           </div>
 
           <div>
-            <label className="field-label">パスワード</label>
+            <label className="field-label">
+              パスワード{editingTeamOriginal ? '（変更する場合は入力し直してください）' : ''}
+            </label>
             <input
               className="field-input"
               type="text"
@@ -651,9 +760,16 @@ export default function Admin() {
           {teamError && <p className="error-text">{teamError}</p>}
           {teamMessage && <p className="success-banner">{teamMessage}</p>}
 
-          <button className="btn-primary" type="submit" disabled={teamSubmitting}>
-            {teamSubmitting ? '追加中…' : 'チームを追加'}
-          </button>
+          <div style={{ display: 'flex', gap: '0.8rem' }}>
+            <button className="btn-primary" type="submit" disabled={teamSubmitting}>
+              {teamSubmitting ? '保存中…' : editingTeamOriginal ? '更新する' : 'チームを追加'}
+            </button>
+            {editingTeamOriginal && (
+              <button type="button" className="btn-ghost" onClick={cancelEditTeam}>
+                キャンセル
+              </button>
+            )}
+          </div>
         </form>
       </AdminCard>
     </div>
