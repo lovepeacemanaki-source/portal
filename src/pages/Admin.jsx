@@ -590,7 +590,7 @@ export default function Admin() {
           )}
 
           <div>
-            <label className="field-label">動画タイトル</label>
+            <label className="field-label">新規動画タイトル</label>
             <input
               className="field-input"
               type="text"
@@ -681,7 +681,7 @@ export default function Admin() {
           )}
 
           <div>
-            <label className="field-label">名前</label>
+            <label className="field-label">新規メンバー名</label>
             <input
               className="field-input"
               type="text"
@@ -734,7 +734,7 @@ export default function Admin() {
           )}
 
           <div>
-            <label className="field-label">チーム名</label>
+            <label className="field-label">新規チーム名</label>
             <input
               className="field-input"
               type="text"
