@@ -254,6 +254,35 @@ export default function Admin() {
     setTeamError('')
   }
 
+  async function handleDeleteTeam() {
+    if (!editingTeamOriginal) return
+    if (
+      !window.confirm(
+        `「${editingTeamOriginal}」を削除します。このチームでログインできなくなります。よろしいですか？`
+      )
+    )
+      return
+    setTeamSubmitting(true)
+    setTeamError('')
+    try {
+      const res = await apiPost('deleteTeam', { teamName: editingTeamOriginal })
+      if (!res.success) {
+        setTeamError(res.message || '削除に失敗しました')
+        return
+      }
+      setTeamMessage(`「${editingTeamOriginal}」を削除しました`)
+      cancelEditTeam()
+      const teamsRes = await apiGet('getTeams')
+      const teamList = (teamsRes.teams || []).filter((t) => t !== '管理人')
+      setTeams(teamList)
+      loadAllTeamVideos(teamList)
+    } catch {
+      setTeamError('削除に失敗しました。時間をおいて再度お試しください')
+    } finally {
+      setTeamSubmitting(false)
+    }
+  }
+
   async function handleAddMember(e) {
     e.preventDefault()
     setMemberMessage('')
@@ -303,6 +332,27 @@ export default function Admin() {
     setEditingMemberId(null)
     setMemberName('')
     setMemberError('')
+  }
+
+  async function handleDeleteMember() {
+    if (!editingMemberId) return
+    if (!window.confirm(`「${memberName}」を削除します。よろしいですか？`)) return
+    setMemberSubmitting(true)
+    setMemberError('')
+    try {
+      const res = await apiPost('deleteMember', { memberID: editingMemberId })
+      if (!res.success) {
+        setMemberError(res.message || '削除に失敗しました')
+        return
+      }
+      setMemberMessage('メンバーを削除しました')
+      cancelEditMember()
+      loadTeamMembers()
+    } catch {
+      setMemberError('削除に失敗しました。時間をおいて再度お試しください')
+    } finally {
+      setMemberSubmitting(false)
+    }
   }
 
   async function handleAuth(e) {
@@ -389,6 +439,28 @@ export default function Admin() {
     setFormError('')
   }
 
+  async function handleDeleteVideo() {
+    if (!editingId) return
+    if (!window.confirm(`「${title}」を削除します。よろしいですか？`)) return
+    setSubmitting(true)
+    setFormError('')
+    try {
+      const res = await apiPost('deleteVideo', { videoID: editingId })
+      if (!res.success) {
+        setFormError(res.message || '削除に失敗しました')
+        return
+      }
+      setMessage('動画を削除しました')
+      cancelEdit()
+      loadTeamVideos()
+      loadAllTeamVideos(teams)
+    } catch {
+      setFormError('削除に失敗しました。時間をおいて再度お試しください')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   function handleLogout() {
     localStorage.removeItem('lp_admin')
     navigate('/')
@@ -463,7 +535,7 @@ export default function Admin() {
         </button>
       </div>
 
-      <AdminCard title="全チームの動画一覧" >
+      <AdminCard title="全チームの動画一覧">
         <div className="team-overview">
           {teams.map((t) => (
             <div key={t} className="team-overview-row">
@@ -653,9 +725,19 @@ export default function Admin() {
               {submitting ? '保存中…' : editingId ? '更新する' : '追加する'}
             </button>
             {editingId && (
-              <button type="button" className="btn-ghost" onClick={cancelEdit}>
-                キャンセル
-              </button>
+              <>
+                <button type="button" className="btn-ghost" onClick={cancelEdit}>
+                  キャンセル
+                </button>
+                <button
+                  type="button"
+                  className="btn-danger"
+                  onClick={handleDeleteVideo}
+                  disabled={submitting}
+                >
+                  削除する
+                </button>
+              </>
             )}
           </div>
         </form>
@@ -722,9 +804,19 @@ export default function Admin() {
               {memberSubmitting ? '保存中…' : editingMemberId ? '更新する' : 'メンバーを追加'}
             </button>
             {editingMemberId && (
-              <button type="button" className="btn-ghost" onClick={cancelEditMember}>
-                キャンセル
-              </button>
+              <>
+                <button type="button" className="btn-ghost" onClick={cancelEditMember}>
+                  キャンセル
+                </button>
+                <button
+                  type="button"
+                  className="btn-danger"
+                  onClick={handleDeleteMember}
+                  disabled={memberSubmitting}
+                >
+                  削除する
+                </button>
+              </>
             )}
           </div>
         </form>
@@ -788,9 +880,19 @@ export default function Admin() {
               {teamSubmitting ? '保存中…' : editingTeamOriginal ? '更新する' : 'チームを追加'}
             </button>
             {editingTeamOriginal && (
-              <button type="button" className="btn-ghost" onClick={cancelEditTeam}>
-                キャンセル
-              </button>
+              <>
+                <button type="button" className="btn-ghost" onClick={cancelEditTeam}>
+                  キャンセル
+                </button>
+                <button
+                  type="button"
+                  className="btn-danger"
+                  onClick={handleDeleteTeam}
+                  disabled={teamSubmitting}
+                >
+                  削除する
+                </button>
+              </>
             )}
           </div>
         </form>
