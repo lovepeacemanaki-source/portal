@@ -305,8 +305,20 @@ button {
 }
 
 .video-row-expanded {
-  padding: 0 1.3rem 1.3rem;
-  border-top: 1px solid var(--line);
+  background: #ffffff;
+  color: #042167;
+  padding: 1.3rem 1.3rem 1.5rem;
+  border-top: 1px solid rgba(4, 33, 103, 0.12);
+  --text: #042167;
+  --text-dim: rgba(4, 33, 103, 0.66);
+  --text-faint: rgba(4, 33, 103, 0.4);
+  --line: rgba(4, 33, 103, 0.15);
+  --field-bg: rgba(4, 33, 103, 0.045);
+  --accent-standout: #2f5dff;
+  --accent-standout-rgb: 47, 93, 255;
+  --accent-btn: #2f5dff;
+  --accent-btn-rgb: 47, 93, 255;
+  --btn-text: #ffffff;
 }
 
 .video-row-desc {
