@@ -463,7 +463,7 @@ export default function Admin() {
         </button>
       </div>
 
-      <AdminCard title="全チームの動画一覧" defaultOpen>
+      <AdminCard title="全チームの動画一覧" >
         <div className="team-overview">
           {teams.map((t) => (
             <div key={t} className="team-overview-row">
