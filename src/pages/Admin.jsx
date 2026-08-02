@@ -155,12 +155,16 @@ export default function Admin() {
     setFbReplySubmittingId(parentId)
     setFbError('')
     try {
-      await apiPost('postFeedback', {
+      const res = await apiPost('postFeedback', {
         videoID,
         name: ADMIN_REPLY_NAME,
         comment,
         replyTo: parentId,
       })
+      if (!res.success) {
+        setFbError('送信に失敗しました。時間をおいて再度お試しください')
+        return
+      }
       setFbReplyDrafts((prev) => ({ ...prev, [parentId]: '' }))
       setFbReplyingId(null)
       loadFbFeedback(videoID)
@@ -261,11 +265,22 @@ export default function Admin() {
     setMemberSubmitting(true)
     try {
       if (editingMemberId) {
-        await apiPost('updateMember', { memberID: editingMemberId, name: memberName.trim() })
+        const res = await apiPost('updateMember', {
+          memberID: editingMemberId,
+          name: memberName.trim(),
+        })
+        if (!res.success) {
+          setMemberError(res.message || '更新に失敗しました')
+          return
+        }
         setMemberMessage(`「${memberName.trim()}」に更新しました`)
         setEditingMemberId(null)
       } else {
-        await apiPost('postMember', { team: memberTeam, name: memberName.trim() })
+        const res = await apiPost('postMember', { team: memberTeam, name: memberName.trim() })
+        if (!res.success) {
+          setMemberError(res.message || '追加に失敗しました')
+          return
+        }
         setMemberMessage(`「${memberName.trim()}」を${memberTeam}に追加しました`)
       }
       setMemberName('')
@@ -320,21 +335,29 @@ export default function Admin() {
     setSubmitting(true)
     try {
       if (editingId) {
-        await apiPost('updateVideo', {
+        const res = await apiPost('updateVideo', {
           videoID: editingId,
           title: title.trim(),
           url: url.trim(),
           description: description.trim(),
         })
+        if (!res.success) {
+          setFormError(res.message || '更新に失敗しました')
+          return
+        }
         setMessage(`「${title.trim()}」を更新しました`)
         setEditingId(null)
       } else {
-        await apiPost('postVideo', {
+        const res = await apiPost('postVideo', {
           team: selectedTeam,
           title: title.trim(),
           url: url.trim(),
           description: description.trim(),
         })
+        if (!res.success) {
+          setFormError(res.message || '追加に失敗しました')
+          return
+        }
         setMessage(`「${title.trim()}」を${selectedTeam}に追加しました`)
       }
       setTitle('')
