@@ -69,7 +69,11 @@ export default function VideoList() {
     setSubmittingId(videoID)
     setFeedbackError('')
     try {
-      await apiPost('postFeedback', { videoID, name: member, comment })
+      const res = await apiPost('postFeedback', { videoID, name: member, comment })
+      if (!res.success) {
+        setFeedbackError('送信に失敗しました。時間をおいて再度お試しください')
+        return
+      }
       setCommentDrafts((prev) => ({ ...prev, [videoID]: '' }))
       loadFeedback(videoID)
     } catch {
@@ -85,7 +89,11 @@ export default function VideoList() {
     setReplySubmittingId(parentId)
     setFeedbackError('')
     try {
-      await apiPost('postFeedback', { videoID, name: member, comment, replyTo: parentId })
+      const res = await apiPost('postFeedback', { videoID, name: member, comment, replyTo: parentId })
+      if (!res.success) {
+        setFeedbackError('送信に失敗しました。時間をおいて再度お試しください')
+        return
+      }
       setReplyDrafts((prev) => ({ ...prev, [parentId]: '' }))
       setReplyingId(null)
       loadFeedback(videoID)
