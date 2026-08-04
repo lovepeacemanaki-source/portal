@@ -17,14 +17,14 @@ function makeStars(count, exclude) {
       delay: Math.random() * 6,
       dur: 2.6 + Math.random() * 3.4,
       op: 0.4 + Math.random() * 0.4,
-      sparkle: Math.random() < 0.22,
+      sparkle: Math.random() < 0.2,
     })
   }
   return stars
 }
 
 // ログイン画面・動画一覧、どちらもロゴが中央上寄りに来るので、そのゾーンは避けておく
-const STARS = makeStars(32, { x1: 25, y1: 6, x2: 75, y2: 46 })
+const STARS = makeStars(64, { x1: 25, y1: 6, x2: 75, y2: 46 })
 
 // ロゴのすぐ周りにだけ、意図的に添える小さな星
 const LOGO_STARS = [
@@ -35,10 +35,10 @@ const LOGO_STARS = [
   { x: 50, y: 6, r: 0.35, delay: 3.4, dur: 3, op: 0.5, sparkle: false },
 ]
 
-// 米粒のような、中心から放射状に光る小さなスパークル形状
+// 細い十字状のスパークル(米粒より痩せた、プラス記号に近い形)
 function sparklePath(cx, cy, r) {
   const tip = r
-  const waist = r * 0.16
+  const waist = r * 0.045
   return [
     `M ${cx} ${cy - tip}`,
     `Q ${cx + waist} ${cy - waist} ${cx + tip} ${cy}`,
@@ -60,8 +60,8 @@ function StarShape({ s, keyPrefix, i }) {
       <path
         key={`${keyPrefix}-${i}`}
         className="star"
-        d={sparklePath(s.x, s.y, s.r * 0.55)}
-        fill="#FFFEF9"
+        d={sparklePath(s.x, s.y, s.r * 0.7)}
+        fill="url(#starGlow)"
         style={style}
       />
     )
@@ -72,8 +72,8 @@ function StarShape({ s, keyPrefix, i }) {
       className="star"
       cx={s.x}
       cy={s.y}
-      r={s.r * 0.16}
-      fill="#FFFEF9"
+      r={s.r * 0.18}
+      fill="url(#starGlow)"
       style={style}
     />
   )
@@ -88,6 +88,13 @@ export default function StarField({ withLogoStars = false }) {
         preserveAspectRatio="xMidYMid slice"
         aria-hidden="true"
       >
+        <defs>
+          <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#FFFEF9" stopOpacity="1" />
+            <stop offset="55%" stopColor="#FFFEF9" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#FFFEF9" stopOpacity="0" />
+          </radialGradient>
+        </defs>
         {STARS.map((s, i) => (
           <StarShape key={i} s={s} keyPrefix="star" i={i} />
         ))}
