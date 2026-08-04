@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiGet, apiPost } from '../config.js'
+import StarField from '../components/StarField.jsx'
 
 export default function VideoList() {
   const navigate = useNavigate()
@@ -106,6 +107,7 @@ export default function VideoList() {
 
   return (
     <div className="page">
+      <StarField withLogoStars />
       <div style={{ textAlign: 'center', marginTop: '-2.5rem', marginBottom: '1.5rem' }}>
         <img
           src="/login-logo.png"
