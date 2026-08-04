@@ -203,8 +203,7 @@ button {
   height: 14px;
   margin: -7px 0 0 -7px;
   border-radius: 50%;
-  border: 1.5px solid rgba(255, 254, 249, 0.55);
-  filter: blur(0.4px);
+  border: 1px solid rgba(255, 254, 249, 0.35);
   transform: scale(0.05);
   opacity: 0;
   z-index: 0;
@@ -217,15 +216,15 @@ button {
     transform: scale(0.05);
     opacity: 0;
   }
-  4% {
-    opacity: 0.55;
+  5% {
+    opacity: 0.4;
   }
-  40% {
-    transform: scale(20);
+  9% {
+    transform: scale(18);
     opacity: 0;
   }
   100% {
-    transform: scale(20);
+    transform: scale(18);
     opacity: 0;
   }
 }
