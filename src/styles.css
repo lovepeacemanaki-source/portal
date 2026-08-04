@@ -111,6 +111,36 @@ button {
   animation: none;
 }
 
+@keyframes twinkle-staccato {
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+  2% {
+    opacity: var(--op-max, 0.9);
+  }
+  5% {
+    opacity: 0.15;
+  }
+  8% {
+    opacity: var(--op-max, 0.9);
+  }
+  11% {
+    opacity: 0.12;
+  }
+  14% {
+    opacity: var(--op-max, 0.9);
+  }
+  18% {
+    opacity: 0.1;
+  }
+}
+
+.star-staccato {
+  animation-name: twinkle-staccato;
+  animation-timing-function: linear;
+}
+
 .shooting-star {
   position: fixed;
   width: 130px;
