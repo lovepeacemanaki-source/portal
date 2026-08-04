@@ -17,7 +17,7 @@ function makeStars(count, exclude) {
       delay: Math.random() * 8,
       dur: 4 + Math.random() * 5,
       op: 0.75 + Math.random() * 0.25,
-      sparkle: Math.random() < 0.1,
+      sparkle: Math.random() < 0.05,
       twinkle: Math.random() < 0.5,
     })
   }
@@ -32,7 +32,7 @@ const LOGO_STARS = [
   { x: 30, y: 14, r: 0.28, delay: 0.4, dur: 5, op: 0.95, sparkle: true, twinkle: true },
   { x: 70, y: 10, r: 0.24, delay: 1.8, dur: 5.6, op: 0.9, sparkle: false, twinkle: true },
   { x: 78, y: 24, r: 0.22, delay: 0.9, dur: 4.4, op: 0.85, sparkle: false, twinkle: false },
-  { x: 22, y: 28, r: 0.24, delay: 2.6, dur: 5.2, op: 0.85, sparkle: true, twinkle: true },
+  { x: 22, y: 28, r: 0.24, delay: 2.6, dur: 5.2, op: 0.85, sparkle: false, twinkle: true },
   { x: 50, y: 6, r: 0.2, delay: 3.4, dur: 4.8, op: 0.8, sparkle: false, twinkle: false },
 ]
 
@@ -44,8 +44,8 @@ const SHOOTING_STAR_PRESETS = [
   { top: '3%', left: '35%', dx: '55vw', dy: '2vh', rot: 3 },
   { top: '52%', left: '-10%', dx: '80vw', dy: '22vh', rot: 16 },
   { top: '60%', left: '20%', dx: '75vw', dy: '25vh', rot: 18 },
-  { top: '-10%', left: '85%', dx: '6vw', dy: '70vh', rot: 78 },
-  { top: '-10%', left: '8%', dx: '6vw', dy: '70vh', rot: 78 },
+  { top: '50%', left: '80%', dx: '-55vw', dy: '26vh', rot: 155 },
+  { top: '47%', left: '15%', dx: '70vw', dy: '30vh', rot: 23 },
 ]
 const shootingStarPreset =
   SHOOTING_STAR_PRESETS[Math.floor(Math.random() * SHOOTING_STAR_PRESETS.length)]
