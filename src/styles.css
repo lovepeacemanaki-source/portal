@@ -22,7 +22,7 @@
   --font-body: 'Work Sans', sans-serif;
 }
 
-/* 管理画面専用テーマ(ほんのり水色がかった白背景・紺文字) */
+/* 邂｡逅�判髱｢蟆ら畑繝��繝�(縺ｻ繧薙�繧頑ｰｴ濶ｲ縺後°縺｣縺溽區閭梧勹繝ｻ邏ｺ譁�ｭ�) */
 body.admin-theme {
   --bg: #f5fcff;
   --text: #042167;
@@ -75,6 +75,51 @@ button {
   min-height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+/* ---------- 譏溽ｩｺ繝ｻ荳矩Κ繧ｰ繝ｩ繝��繧ｷ繝ｧ繝ｳ貍泌� ---------- */
+
+.starfield {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.12;
+  }
+  50% {
+    opacity: var(--op-max, 0.8);
+  }
+}
+
+.star {
+  animation-name: twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-duration: var(--star-dur, 3s);
+  animation-delay: var(--star-delay, 0s);
+}
+
+.bg-bottom-fade {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34vh;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(2, 12, 40, 0) 0%,
+    rgba(2, 12, 40, 0.55) 65%,
+    rgba(1, 8, 28, 0.78) 100%
+  );
 }
 
 /* ---------- shared ---------- */
@@ -543,7 +588,7 @@ button {
   margin: 0;
 }
 
-/* 開閉式カード(白背景・右側のみ丸み・左端に紺の帯) */
+/* 髢矩哩蠑上き繝ｼ繝�(逋ｽ閭梧勹繝ｻ蜿ｳ蛛ｴ縺ｮ縺ｿ荳ｸ縺ｿ繝ｻ蟾ｦ遶ｯ縺ｫ邏ｺ縺ｮ蟶ｯ) */
 .admin-card {
   background: #ffffff;
   border: 1px solid rgba(4, 33, 103, 0.12);
