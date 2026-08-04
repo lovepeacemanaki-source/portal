@@ -13,11 +13,11 @@ function makeStars(count, exclude) {
     stars.push({
       x,
       y,
-      r: 0.3 + Math.random() * 0.5,
+      r: 0.22 + Math.random() * 0.16,
       delay: Math.random() * 8,
       dur: 4 + Math.random() * 5,
-      op: 0.35 + Math.random() * 0.4,
-      sparkle: Math.random() < 0.16,
+      op: 0.6 + Math.random() * 0.4,
+      sparkle: Math.random() < 0.14,
       twinkle: Math.random() < 0.5,
     })
   }
@@ -25,29 +25,20 @@ function makeStars(count, exclude) {
 }
 
 // ログイン画面・動画一覧、どちらもロゴが中央上寄りに来るので、そのゾーンは避けておく
-const STARS = makeStars(100, { x1: 25, y1: 6, x2: 75, y2: 46 })
+const STARS = makeStars(110, { x1: 25, y1: 6, x2: 75, y2: 46 })
 
 // ロゴのすぐ周りにだけ、意図的に添える小さな星
 const LOGO_STARS = [
-  { x: 30, y: 14, r: 0.55, delay: 0.4, dur: 5, op: 0.7, sparkle: true, twinkle: true },
-  { x: 70, y: 10, r: 0.45, delay: 1.8, dur: 5.6, op: 0.6, sparkle: false, twinkle: true },
-  { x: 78, y: 24, r: 0.4, delay: 0.9, dur: 4.4, op: 0.5, sparkle: false, twinkle: false },
-  { x: 22, y: 28, r: 0.45, delay: 2.6, dur: 5.2, op: 0.55, sparkle: true, twinkle: true },
-  { x: 50, y: 6, r: 0.35, delay: 3.4, dur: 4.8, op: 0.45, sparkle: false, twinkle: false },
+  { x: 30, y: 14, r: 0.3, delay: 0.4, dur: 5, op: 0.9, sparkle: true, twinkle: true },
+  { x: 70, y: 10, r: 0.26, delay: 1.8, dur: 5.6, op: 0.8, sparkle: false, twinkle: true },
+  { x: 78, y: 24, r: 0.24, delay: 0.9, dur: 4.4, op: 0.7, sparkle: false, twinkle: false },
+  { x: 22, y: 28, r: 0.26, delay: 2.6, dur: 5.2, op: 0.75, sparkle: true, twinkle: true },
+  { x: 50, y: 6, r: 0.22, delay: 3.4, dur: 4.8, op: 0.65, sparkle: false, twinkle: false },
 ]
 
-// 細く長い十字状のスパークル
+// 細くまっすぐな「+」に近いスパークル
 function sparklePath(cx, cy, r) {
-  const tip = r
-  const waist = r * 0.028
-  return [
-    `M ${cx} ${cy - tip}`,
-    `Q ${cx + waist} ${cy - waist} ${cx + tip} ${cy}`,
-    `Q ${cx + waist} ${cy + waist} ${cx} ${cy + tip}`,
-    `Q ${cx - waist} ${cy + waist} ${cx - tip} ${cy}`,
-    `Q ${cx - waist} ${cy - waist} ${cx} ${cy - tip}`,
-    'Z',
-  ].join(' ')
+  return `M ${cx} ${cy - r} L ${cx} ${cy + r} M ${cx - r} ${cy} L ${cx + r} ${cy}`
 }
 
 function StarShape({ s, keyPrefix, i }) {
@@ -61,12 +52,16 @@ function StarShape({ s, keyPrefix, i }) {
     : { opacity: s.op }
 
   if (s.sparkle) {
+    const tip = s.r * 1.6
     return (
       <path
         key={`${keyPrefix}-${i}`}
         className={className}
-        d={sparklePath(s.x, s.y, s.r * 1.3)}
-        fill="url(#starGlow)"
+        d={sparklePath(s.x, s.y, tip)}
+        stroke="url(#starGlow)"
+        strokeWidth={s.r * 0.16}
+        strokeLinecap="round"
+        fill="none"
         style={style}
       />
     )
@@ -77,7 +72,7 @@ function StarShape({ s, keyPrefix, i }) {
       className={className}
       cx={s.x}
       cy={s.y}
-      r={s.r * 0.17}
+      r={s.r * 0.18}
       fill="url(#starGlow)"
       style={style}
     />
@@ -96,7 +91,7 @@ export default function StarField({ withLogoStars = false }) {
         <defs>
           <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#FFFEF9" stopOpacity="1" />
-            <stop offset="55%" stopColor="#FFFEF9" stopOpacity="0.6" />
+            <stop offset="35%" stopColor="#FFFEF9" stopOpacity="1" />
             <stop offset="100%" stopColor="#FFFEF9" stopOpacity="0" />
           </radialGradient>
         </defs>
