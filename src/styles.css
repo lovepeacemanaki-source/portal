@@ -197,38 +197,6 @@ button {
   );
 }
 
-.ripple-ring {
-  position: fixed;
-  width: 14px;
-  height: 14px;
-  margin: -7px 0 0 -7px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 254, 249, 0.35);
-  transform: scale(0.05);
-  opacity: 0;
-  z-index: 0;
-  pointer-events: none;
-  animation: ripple-ring-expand 45s ease-out infinite;
-}
-
-@keyframes ripple-ring-expand {
-  0% {
-    transform: scale(0.05);
-    opacity: 0;
-  }
-  5% {
-    opacity: 0.4;
-  }
-  9% {
-    transform: scale(18);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(18);
-    opacity: 0;
-  }
-}
-
 /* ---------- shared ---------- */
 
 .btn-primary {
