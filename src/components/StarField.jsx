@@ -62,9 +62,21 @@ function pickPoint(exclude) {
   return { x, y }
 }
 
-// ポワーンと広がって消える、柔らかい光の波紋。3箇所を15秒ずつずらして配置
+// ポワーンと広がって消える、水面の波紋のような同心円。
+// 1箇所につき数本のリングを少しずつタイミングをずらして重ね、
+// 本物の波紋のように何重にも輪が広がって見えるようにしている。
 const RIPPLE_ZONE = { x1: 25, y1: 6, x2: 75, y2: 46 }
-const RIPPLES = [0, 1, 2].map((i) => ({ ...pickPoint(RIPPLE_ZONE), delay: i * 15 }))
+const RIPPLE_RING_COUNT = 4
+const RIPPLE_RING_STAGGER = 0.9 // 秒
+
+const RIPPLES = [0, 1, 2].flatMap((i) => {
+  const point = pickPoint(RIPPLE_ZONE)
+  const baseDelay = i * 15
+  return Array.from({ length: RIPPLE_RING_COUNT }, (_, ringIdx) => ({
+    ...point,
+    delay: baseDelay + ringIdx * RIPPLE_RING_STAGGER,
+  }))
+})
 
 // ロゴのゾーンを避けた、流れ星の安全な経路パターン
 // (画面の上端・下端・左端・右端だけを通るので、中央のロゴの裏を通らない)
@@ -187,7 +199,7 @@ export default function StarField({ withLogoStars = false }) {
       {RIPPLES.map((r, i) => (
         <div
           key={`ripple-${i}`}
-          className="ripple"
+          className="ripple-ring"
           aria-hidden="true"
           style={{ top: `${r.y}%`, left: `${r.x}%`, animationDelay: `${r.delay}s` }}
         />
