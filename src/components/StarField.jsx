@@ -66,8 +66,8 @@ function pickPoint(exclude) {
 // 1箇所につき数本のリングを少しずつタイミングをずらして重ね、
 // 本物の波紋のように何重にも輪が広がって見えるようにしている。
 const RIPPLE_ZONE = { x1: 25, y1: 6, x2: 75, y2: 46 }
-const RIPPLE_RING_COUNT = 4
-const RIPPLE_RING_STAGGER = 0.9 // 秒
+const RIPPLE_RING_COUNT = 3
+const RIPPLE_RING_STAGGER = 0.35 // 秒
 
 const RIPPLES = [0, 1, 2].flatMap((i) => {
   const point = pickPoint(RIPPLE_ZONE)
