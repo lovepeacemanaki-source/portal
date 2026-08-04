@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiGet } from '../config.js'
+import StarField from '../components/StarField.jsx'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -67,6 +68,7 @@ export default function Login() {
 
   return (
     <div className="login-screen">
+      <StarField withLogoStars />
       <div className="login-card">
         <img
           src="/login-logo.png"
