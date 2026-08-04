@@ -79,7 +79,7 @@ function StarShape({ s, keyPrefix, i }) {
         }
 
   if (s.sparkle) {
-    const tip = s.r * 1.6
+    const tip = s.r * 0.9
     const dimStyle =
       s.mode === 'static'
         ? { opacity: s.op * 0.45 }
