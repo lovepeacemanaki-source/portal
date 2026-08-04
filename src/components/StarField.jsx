@@ -2,6 +2,13 @@
 // 実際の夜空のように、瞬く星と静かに光ってるだけの星を混ぜている。
 // ロゴが置かれる中央上寄りのエリアはあえて星を避け、主役を邪魔しないようにしてある。
 
+function pickMode() {
+  const roll = Math.random()
+  if (roll < 0.35) return 'staccato'
+  if (roll < 0.35 + 0.325) return 'twinkle'
+  return 'static'
+}
+
 function makeStars(count, exclude) {
   const stars = []
   let guard = 0
@@ -18,7 +25,7 @@ function makeStars(count, exclude) {
       dur: 4 + Math.random() * 5,
       op: 0.75 + Math.random() * 0.25,
       sparkle: Math.random() < 0.05,
-      twinkle: Math.random() < 0.5,
+      mode: pickMode(),
     })
   }
   return stars
@@ -29,11 +36,11 @@ const STARS = makeStars(280, { x1: 25, y1: 6, x2: 75, y2: 46 })
 
 // ロゴのすぐ周りにだけ、意図的に添える小さな星
 const LOGO_STARS = [
-  { x: 30, y: 14, r: 0.28, delay: 0.4, dur: 5, op: 0.95, sparkle: true, twinkle: true },
-  { x: 70, y: 10, r: 0.24, delay: 1.8, dur: 5.6, op: 0.9, sparkle: false, twinkle: true },
-  { x: 78, y: 24, r: 0.22, delay: 0.9, dur: 4.4, op: 0.85, sparkle: false, twinkle: false },
-  { x: 22, y: 28, r: 0.24, delay: 2.6, dur: 5.2, op: 0.85, sparkle: false, twinkle: true },
-  { x: 50, y: 6, r: 0.2, delay: 3.4, dur: 4.8, op: 0.8, sparkle: false, twinkle: false },
+  { x: 30, y: 14, r: 0.28, delay: 0.4, dur: 5, op: 0.95, sparkle: true, mode: 'staccato' },
+  { x: 70, y: 10, r: 0.24, delay: 1.8, dur: 5.6, op: 0.9, sparkle: false, mode: 'twinkle' },
+  { x: 78, y: 24, r: 0.22, delay: 0.9, dur: 4.4, op: 0.85, sparkle: false, mode: 'static' },
+  { x: 22, y: 28, r: 0.24, delay: 2.6, dur: 5.2, op: 0.85, sparkle: false, mode: 'twinkle' },
+  { x: 50, y: 6, r: 0.2, delay: 3.4, dur: 4.8, op: 0.8, sparkle: false, mode: 'static' },
 ]
 
 // ロゴのゾーンを避けた、流れ星の安全な経路パターン
@@ -56,24 +63,31 @@ function sparklePath(cx, cy, r) {
 }
 
 function StarShape({ s, keyPrefix, i }) {
-  const className = s.twinkle ? 'star' : 'star star-static'
-  const style = s.twinkle
-    ? {
-        '--star-dur': `${s.dur}s`,
-        '--star-delay': `${s.delay}s`,
-        '--op-max': s.op,
-      }
-    : { opacity: s.op }
+  const className =
+    s.mode === 'staccato'
+      ? 'star star-staccato'
+      : s.mode === 'twinkle'
+      ? 'star'
+      : 'star star-static'
+  const style =
+    s.mode === 'static'
+      ? { opacity: s.op }
+      : {
+          '--star-dur': `${s.dur}s`,
+          '--star-delay': `${s.delay}s`,
+          '--op-max': s.op,
+        }
 
   if (s.sparkle) {
     const tip = s.r * 1.6
-    const dimStyle = s.twinkle
-      ? {
-          '--star-dur': `${s.dur}s`,
-          '--star-delay': `${s.delay}s`,
-          '--op-max': s.op * 0.45,
-        }
-      : { opacity: s.op * 0.45 }
+    const dimStyle =
+      s.mode === 'static'
+        ? { opacity: s.op * 0.45 }
+        : {
+            '--star-dur': `${s.dur}s`,
+            '--star-delay': `${s.delay}s`,
+            '--op-max': s.op * 0.45,
+          }
 
     return (
       <g key={`${keyPrefix}-${i}`}>
