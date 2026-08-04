@@ -107,6 +107,10 @@ button {
   animation-fill-mode: backwards;
 }
 
+.star-static {
+  animation: none;
+}
+
 .shooting-star {
   position: fixed;
   top: 12%;
