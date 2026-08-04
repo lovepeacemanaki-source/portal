@@ -33,6 +33,7 @@ export default function Login() {
         const res = await apiGet('login', { team: team.trim(), password: password.trim() })
         if (res.success) {
           localStorage.setItem('lp_admin', 'true')
+          localStorage.setItem('lp_admin_login_at', String(Date.now()))
           navigate('/admin')
           return
         }
@@ -63,6 +64,7 @@ export default function Login() {
     }
     localStorage.setItem('lp_team', team.trim())
     localStorage.setItem('lp_member', selectedMember)
+    localStorage.setItem('lp_login_at', String(Date.now()))
     navigate('/videos')
   }
 
