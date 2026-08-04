@@ -13,11 +13,11 @@ function makeStars(count, exclude) {
     stars.push({
       x,
       y,
-      r: 0.22 + Math.random() * 0.16,
+      r: 0.2 + Math.random() * 0.14,
       delay: Math.random() * 8,
       dur: 4 + Math.random() * 5,
-      op: 0.6 + Math.random() * 0.4,
-      sparkle: Math.random() < 0.14,
+      op: 0.75 + Math.random() * 0.25,
+      sparkle: Math.random() < 0.1,
       twinkle: Math.random() < 0.5,
     })
   }
@@ -25,16 +25,29 @@ function makeStars(count, exclude) {
 }
 
 // ログイン画面・動画一覧、どちらもロゴが中央上寄りに来るので、そのゾーンは避けておく
-const STARS = makeStars(110, { x1: 25, y1: 6, x2: 75, y2: 46 })
+const STARS = makeStars(140, { x1: 25, y1: 6, x2: 75, y2: 46 })
 
 // ロゴのすぐ周りにだけ、意図的に添える小さな星
 const LOGO_STARS = [
-  { x: 30, y: 14, r: 0.3, delay: 0.4, dur: 5, op: 0.9, sparkle: true, twinkle: true },
-  { x: 70, y: 10, r: 0.26, delay: 1.8, dur: 5.6, op: 0.8, sparkle: false, twinkle: true },
-  { x: 78, y: 24, r: 0.24, delay: 0.9, dur: 4.4, op: 0.7, sparkle: false, twinkle: false },
-  { x: 22, y: 28, r: 0.26, delay: 2.6, dur: 5.2, op: 0.75, sparkle: true, twinkle: true },
-  { x: 50, y: 6, r: 0.22, delay: 3.4, dur: 4.8, op: 0.65, sparkle: false, twinkle: false },
+  { x: 30, y: 14, r: 0.28, delay: 0.4, dur: 5, op: 0.95, sparkle: true, twinkle: true },
+  { x: 70, y: 10, r: 0.24, delay: 1.8, dur: 5.6, op: 0.9, sparkle: false, twinkle: true },
+  { x: 78, y: 24, r: 0.22, delay: 0.9, dur: 4.4, op: 0.85, sparkle: false, twinkle: false },
+  { x: 22, y: 28, r: 0.24, delay: 2.6, dur: 5.2, op: 0.85, sparkle: true, twinkle: true },
+  { x: 50, y: 6, r: 0.2, delay: 3.4, dur: 4.8, op: 0.8, sparkle: false, twinkle: false },
 ]
+
+// ロゴのゾーンを避けた、流れ星の安全な経路パターン
+// (画面の上端・下端・左端・右端だけを通るので、中央のロゴの裏を通らない)
+const SHOOTING_STAR_PRESETS = [
+  { top: '3%', left: '-10%', dx: '72vw', dy: '2vh', rot: 3 },
+  { top: '70%', left: '-10%', dx: '78vw', dy: '13vh', rot: 10 },
+  { top: '92%', left: '20%', dx: '68vw', dy: '-24vh', rot: -18 },
+  { top: '-8%', left: '85%', dx: '3vw', dy: '92vh', rot: 78 },
+  { top: '108%', left: '4%', dx: '9vw', dy: '-96vh', rot: -78 },
+  { top: '2%', left: '30%', dx: '60vw', dy: '3vh', rot: 4 },
+]
+const shootingStarPreset =
+  SHOOTING_STAR_PRESETS[Math.floor(Math.random() * SHOOTING_STAR_PRESETS.length)]
 
 // 細くまっすぐな「+」に近いスパークル
 function sparklePath(cx, cy, r) {
@@ -91,7 +104,7 @@ export default function StarField({ withLogoStars = false }) {
         <defs>
           <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#FFFEF9" stopOpacity="1" />
-            <stop offset="35%" stopColor="#FFFEF9" stopOpacity="1" />
+            <stop offset="45%" stopColor="#FFFEF9" stopOpacity="1" />
             <stop offset="100%" stopColor="#FFFEF9" stopOpacity="0" />
           </radialGradient>
         </defs>
@@ -103,7 +116,17 @@ export default function StarField({ withLogoStars = false }) {
             <StarShape key={`logo-${i}`} s={s} keyPrefix="logo-star" i={i} />
           ))}
       </svg>
-      <div className="shooting-star" aria-hidden="true" />
+      <div
+        className="shooting-star"
+        aria-hidden="true"
+        style={{
+          top: shootingStarPreset.top,
+          left: shootingStarPreset.left,
+          '--ss-dx': shootingStarPreset.dx,
+          '--ss-dy': shootingStarPreset.dy,
+          '--ss-rot': `${shootingStarPreset.rot}deg`,
+        }}
+      />
       <div className="bg-bottom-fade" aria-hidden="true" />
     </>
   )
