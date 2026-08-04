@@ -113,8 +113,6 @@ button {
 
 .shooting-star {
   position: fixed;
-  top: 12%;
-  left: -12%;
   width: 130px;
   height: 1.5px;
   background: linear-gradient(
@@ -128,13 +126,13 @@ button {
   opacity: 0;
   z-index: 0;
   pointer-events: none;
-  transform: rotate(18deg);
+  transform: rotate(var(--ss-rot, 18deg));
   animation: shooting-star-move 60s linear infinite;
 }
 
 @keyframes shooting-star-move {
   0% {
-    transform: translate(0, 0) rotate(18deg);
+    transform: translate(0, 0) rotate(var(--ss-rot, 18deg));
     opacity: 0;
   }
   1.5% {
@@ -144,11 +142,11 @@ button {
     opacity: 1;
   }
   7% {
-    transform: translate(62vw, 32vh) rotate(18deg);
+    transform: translate(var(--ss-dx, 62vw), var(--ss-dy, 32vh)) rotate(var(--ss-rot, 18deg));
     opacity: 0;
   }
   100% {
-    transform: translate(62vw, 32vh) rotate(18deg);
+    transform: translate(var(--ss-dx, 62vw), var(--ss-dy, 32vh)) rotate(var(--ss-rot, 18deg));
     opacity: 0;
   }
 }
