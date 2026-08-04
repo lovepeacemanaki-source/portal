@@ -401,6 +401,8 @@ button {
 }
 
 .video-row {
+  position: relative;
+  z-index: 1;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
