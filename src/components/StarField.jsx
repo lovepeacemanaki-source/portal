@@ -25,7 +25,7 @@ function makeStars(count, exclude) {
 }
 
 // ログイン画面・動画一覧、どちらもロゴが中央上寄りに来るので、そのゾーンは避けておく
-const STARS = makeStars(140, { x1: 25, y1: 6, x2: 75, y2: 46 })
+const STARS = makeStars(280, { x1: 25, y1: 6, x2: 75, y2: 46 })
 
 // ロゴのすぐ周りにだけ、意図的に添える小さな星
 const LOGO_STARS = [
