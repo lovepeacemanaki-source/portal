@@ -43,41 +43,6 @@ const LOGO_STARS = [
   { x: 50, y: 6, r: 0.2, delay: 3.4, dur: 4.8, op: 0.8, sparkle: false, mode: 'static' },
 ]
 
-// 中央のロゴゾーンを避けて、ランダムな1点を選ぶ
-function pickPoint(exclude) {
-  let x, y
-  let guard = 0
-  do {
-    x = Math.random() * 100
-    y = Math.random() * 100
-    guard++
-  } while (
-    exclude &&
-    x > exclude.x1 &&
-    x < exclude.x2 &&
-    y > exclude.y1 &&
-    y < exclude.y2 &&
-    guard < 20
-  )
-  return { x, y }
-}
-
-// ポワーンと広がって消える、水面の波紋のような同心円。
-// 1箇所につき数本のリングを少しずつタイミングをずらして重ね、
-// 本物の波紋のように何重にも輪が広がって見えるようにしている。
-const RIPPLE_ZONE = { x1: 25, y1: 6, x2: 75, y2: 46 }
-const RIPPLE_RING_COUNT = 3
-const RIPPLE_RING_STAGGER = 0.35 // 秒
-
-const RIPPLES = [0, 1, 2].flatMap((i) => {
-  const point = pickPoint(RIPPLE_ZONE)
-  const baseDelay = i * 15
-  return Array.from({ length: RIPPLE_RING_COUNT }, (_, ringIdx) => ({
-    ...point,
-    delay: baseDelay + ringIdx * RIPPLE_RING_STAGGER,
-  }))
-})
-
 // ロゴのゾーンを避けた、流れ星の安全な経路パターン
 // (画面の上端・下端・左端・右端だけを通るので、中央のロゴの裏を通らない)
 // どれも「上から下」に落ちる自然な向きに統一してある
@@ -196,14 +161,6 @@ export default function StarField({ withLogoStars = false }) {
           '--ss-rot': `${shootingStarPreset.rot}deg`,
         }}
       />
-      {RIPPLES.map((r, i) => (
-        <div
-          key={`ripple-${i}`}
-          className="ripple-ring"
-          aria-hidden="true"
-          style={{ top: `${r.y}%`, left: `${r.x}%`, animationDelay: `${r.delay}s` }}
-        />
-      ))}
       <div className="bg-bottom-fade" aria-hidden="true" />
     </>
   )
