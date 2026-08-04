@@ -22,7 +22,7 @@
   --font-body: 'Work Sans', sans-serif;
 }
 
-/* 邂｡逅�判髱｢蟆ら畑繝��繝�(縺ｻ繧薙�繧頑ｰｴ濶ｲ縺後°縺｣縺溽區閭梧勹繝ｻ邏ｺ譁�ｭ�) */
+/* 管理画面専用テーマ(ほんのり水色がかった白背景・紺文字) */
 body.admin-theme {
   --bg: #f5fcff;
   --text: #042167;
@@ -77,7 +77,7 @@ button {
   flex-direction: column;
 }
 
-/* ---------- 譏溽ｩｺ繝ｻ荳矩Κ繧ｰ繝ｩ繝��繧ｷ繝ｧ繝ｳ貍泌� ---------- */
+/* ---------- 星空・下部グラデーション演出 ---------- */
 
 .starfield {
   position: fixed;
@@ -104,6 +104,43 @@ button {
   animation-iteration-count: infinite;
   animation-duration: var(--star-dur, 3s);
   animation-delay: var(--star-delay, 0s);
+  animation-fill-mode: backwards;
+}
+
+.shooting-star {
+  position: fixed;
+  top: 12%;
+  left: -12%;
+  width: 130px;
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(255, 254, 249, 0.95), rgba(255, 254, 249, 0));
+  border-radius: 999px;
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+  transform: rotate(18deg);
+  animation: shooting-star-move 60s linear infinite;
+}
+
+@keyframes shooting-star-move {
+  0% {
+    transform: translate(0, 0) rotate(18deg);
+    opacity: 0;
+  }
+  1.5% {
+    opacity: 0;
+  }
+  2.5% {
+    opacity: 1;
+  }
+  7% {
+    transform: translate(62vw, 32vh) rotate(18deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(62vw, 32vh) rotate(18deg);
+    opacity: 0;
+  }
 }
 
 .bg-bottom-fade {
@@ -588,7 +625,7 @@ button {
   margin: 0;
 }
 
-/* 髢矩哩蠑上き繝ｼ繝�(逋ｽ閭梧勹繝ｻ蜿ｳ蛛ｴ縺ｮ縺ｿ荳ｸ縺ｿ繝ｻ蟾ｦ遶ｯ縺ｫ邏ｺ縺ｮ蟶ｯ) */
+/* 開閉式カード(白背景・右側のみ丸み・左端に紺の帯) */
 .admin-card {
   background: #ffffff;
   border: 1px solid rgba(4, 33, 103, 0.12);
