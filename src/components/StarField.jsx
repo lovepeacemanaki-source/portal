@@ -22,7 +22,7 @@ function makeStars(count, exclude) {
       y,
       r: 0.2 + Math.random() * 0.14,
       delay: Math.random() * 8,
-      dur: 4 + Math.random() * 5,
+      dur: 2.7 + Math.random() * 3.3,
       op: 0.75 + Math.random() * 0.25,
       sparkle: Math.random() < 0.05,
       mode: pickMode(),
@@ -32,15 +32,15 @@ function makeStars(count, exclude) {
 }
 
 // ログイン画面・動画一覧、どちらもロゴが中央上寄りに来るので、そのゾーンは避けておく
-const STARS = makeStars(560, { x1: 25, y1: 6, x2: 75, y2: 46 })
+const STARS = makeStars(840, { x1: 25, y1: 6, x2: 75, y2: 46 })
 
 // ロゴのすぐ周りにだけ、意図的に添える小さな星
 const LOGO_STARS = [
-  { x: 30, y: 14, r: 0.28, delay: 0.4, dur: 5, op: 0.95, sparkle: true, mode: 'staccato' },
-  { x: 70, y: 10, r: 0.24, delay: 1.8, dur: 5.6, op: 0.9, sparkle: false, mode: 'twinkle' },
-  { x: 78, y: 24, r: 0.22, delay: 0.9, dur: 4.4, op: 0.85, sparkle: false, mode: 'static' },
-  { x: 22, y: 28, r: 0.24, delay: 2.6, dur: 5.2, op: 0.85, sparkle: false, mode: 'twinkle' },
-  { x: 50, y: 6, r: 0.2, delay: 3.4, dur: 4.8, op: 0.8, sparkle: false, mode: 'static' },
+  { x: 30, y: 14, r: 0.28, delay: 0.4, dur: 3.3, op: 0.95, sparkle: true, mode: 'staccato' },
+  { x: 70, y: 10, r: 0.24, delay: 1.8, dur: 3.7, op: 0.9, sparkle: false, mode: 'twinkle' },
+  { x: 78, y: 24, r: 0.22, delay: 0.9, dur: 2.9, op: 0.85, sparkle: false, mode: 'static' },
+  { x: 22, y: 28, r: 0.24, delay: 2.6, dur: 3.5, op: 0.85, sparkle: false, mode: 'twinkle' },
+  { x: 50, y: 6, r: 0.2, delay: 3.4, dur: 3.2, op: 0.8, sparkle: false, mode: 'static' },
 ]
 
 // ロゴのゾーンを避けた、流れ星の安全な経路パターン
