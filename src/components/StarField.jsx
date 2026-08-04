@@ -38,13 +38,14 @@ const LOGO_STARS = [
 
 // ロゴのゾーンを避けた、流れ星の安全な経路パターン
 // (画面の上端・下端・左端・右端だけを通るので、中央のロゴの裏を通らない)
+// どれも「上から下」に落ちる自然な向きに統一してある
 const SHOOTING_STAR_PRESETS = [
-  { top: '3%', left: '-10%', dx: '72vw', dy: '2vh', rot: 3 },
-  { top: '70%', left: '-10%', dx: '78vw', dy: '13vh', rot: 10 },
-  { top: '92%', left: '20%', dx: '68vw', dy: '-24vh', rot: -18 },
-  { top: '-8%', left: '85%', dx: '3vw', dy: '92vh', rot: 78 },
-  { top: '108%', left: '4%', dx: '9vw', dy: '-96vh', rot: -78 },
-  { top: '2%', left: '30%', dx: '60vw', dy: '3vh', rot: 4 },
+  { top: '1%', left: '-10%', dx: '82vw', dy: '3vh', rot: 4 },
+  { top: '3%', left: '35%', dx: '55vw', dy: '2vh', rot: 3 },
+  { top: '52%', left: '-10%', dx: '80vw', dy: '22vh', rot: 16 },
+  { top: '60%', left: '20%', dx: '75vw', dy: '25vh', rot: 18 },
+  { top: '-10%', left: '85%', dx: '6vw', dy: '70vh', rot: 78 },
+  { top: '-10%', left: '8%', dx: '6vw', dy: '70vh', rot: 78 },
 ]
 const shootingStarPreset =
   SHOOTING_STAR_PRESETS[Math.floor(Math.random() * SHOOTING_STAR_PRESETS.length)]
