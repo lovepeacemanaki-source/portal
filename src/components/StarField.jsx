@@ -67,17 +67,36 @@ function StarShape({ s, keyPrefix, i }) {
 
   if (s.sparkle) {
     const tip = s.r * 1.6
+    const dimStyle = s.twinkle
+      ? {
+          '--star-dur': `${s.dur}s`,
+          '--star-delay': `${s.delay}s`,
+          '--op-max': s.op * 0.45,
+        }
+      : { opacity: s.op * 0.45 }
+
     return (
-      <path
-        key={`${keyPrefix}-${i}`}
-        className={className}
-        d={sparklePath(s.x, s.y, tip)}
-        stroke="url(#starGlow)"
-        strokeWidth={s.r * 0.16}
-        strokeLinecap="round"
-        fill="none"
-        style={style}
-      />
+      <g key={`${keyPrefix}-${i}`}>
+        <path
+          className={className}
+          d={sparklePath(s.x, s.y, tip)}
+          stroke="url(#starGlow)"
+          strokeWidth={s.r * 0.16}
+          strokeLinecap="round"
+          fill="none"
+          style={style}
+        />
+        <path
+          className={className}
+          d={sparklePath(s.x, s.y, tip * 0.6)}
+          stroke="url(#starGlow)"
+          strokeWidth={s.r * 0.1}
+          strokeLinecap="round"
+          fill="none"
+          style={dimStyle}
+          transform={`rotate(45 ${s.x} ${s.y})`}
+        />
+      </g>
     )
   }
   return (
