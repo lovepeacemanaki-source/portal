@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { apiGet, apiPost } from '../config.js'
 import StarField from '../components/StarField.jsx'
 
+const SESSION_MS = 10 * 60 * 1000 // 10分でセッション切れ
+
 export default function VideoList() {
   const navigate = useNavigate()
   const [videos, setVideos] = useState([])
@@ -20,20 +22,38 @@ export default function VideoList() {
   const [replySubmittingId, setReplySubmittingId] = useState(null)
   const rowRefs = useRef({})
 
+  function clearSessionAndGoLogin() {
+    localStorage.removeItem('lp_team')
+    localStorage.removeItem('lp_member')
+    localStorage.removeItem('lp_login_at')
+    navigate('/')
+  }
+
   useEffect(() => {
-    if (!team || !member) {
-      navigate('/')
+    const loginAt = Number(localStorage.getItem('lp_login_at') || 0)
+    const expired = !loginAt || Date.now() - loginAt > SESSION_MS
+
+    if (!team || !member || expired) {
+      clearSessionAndGoLogin()
       return
     }
+
     apiGet('getVideos', { team }).then((res) => {
       setVideos(res.videos || [])
       setLoading(false)
     })
+
+    // 表示中に10分を迎えたら、その場でログイン画面に戻す
+    const remaining = SESSION_MS - (Date.now() - loginAt)
+    const timer = setTimeout(clearSessionAndGoLogin, remaining)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [team, member, navigate])
 
   function handleLogout() {
     localStorage.removeItem('lp_team')
     localStorage.removeItem('lp_member')
+    localStorage.removeItem('lp_login_at')
     navigate('/')
   }
 
