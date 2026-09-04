@@ -321,21 +321,25 @@ export default function VideoList() {
                                       >
                                         返信
                                       </button>
-                                      <button
-                                        type="button"
-                                        className="feedback-reply-btn"
-                                        onClick={() => startEditComment(f)}
-                                      >
-                                        編集
-                                      </button>
-                                      <button
-                                        type="button"
-                                        className="feedback-reply-btn"
-                                        disabled={deleteSubmittingId === f.feedbackID}
-                                        onClick={() => handleDeleteComment(v.videoID, f.feedbackID)}
-                                      >
-                                        {deleteSubmittingId === f.feedbackID ? '削除中…' : '削除'}
-                                      </button>
+                                      {f.name === member && (
+                                        <>
+                                          <button
+                                            type="button"
+                                            className="feedback-reply-btn"
+                                            onClick={() => startEditComment(f)}
+                                          >
+                                            編集
+                                          </button>
+                                          <button
+                                            type="button"
+                                            className="feedback-reply-btn"
+                                            disabled={deleteSubmittingId === f.feedbackID}
+                                            onClick={() => handleDeleteComment(v.videoID, f.feedbackID)}
+                                          >
+                                            {deleteSubmittingId === f.feedbackID ? '削除中…' : '削除'}
+                                          </button>
+                                        </>
+                                      )}
                                     </div>
                                   </>
                                 )}
@@ -389,27 +393,29 @@ export default function VideoList() {
                                       ) : (
                                         <>
                                           <div className="feedback-item-text">{r.comment}</div>
-                                          <div style={{ display: 'flex', gap: '1rem' }}>
-                                            <button
-                                              type="button"
-                                              className="feedback-reply-btn"
-                                              onClick={() => startEditComment(r)}
-                                            >
-                                              編集
-                                            </button>
-                                            <button
-                                              type="button"
-                                              className="feedback-reply-btn"
-                                              disabled={deleteSubmittingId === r.feedbackID}
-                                              onClick={() =>
-                                                handleDeleteComment(v.videoID, r.feedbackID)
-                                              }
-                                            >
-                                              {deleteSubmittingId === r.feedbackID
-                                                ? '削除中…'
-                                                : '削除'}
-                                            </button>
-                                          </div>
+                                          {r.name === member && (
+                                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                              <button
+                                                type="button"
+                                                className="feedback-reply-btn"
+                                                onClick={() => startEditComment(r)}
+                                              >
+                                                編集
+                                              </button>
+                                              <button
+                                                type="button"
+                                                className="feedback-reply-btn"
+                                                disabled={deleteSubmittingId === r.feedbackID}
+                                                onClick={() =>
+                                                  handleDeleteComment(v.videoID, r.feedbackID)
+                                                }
+                                              >
+                                                {deleteSubmittingId === r.feedbackID
+                                                  ? '削除中…'
+                                                  : '削除'}
+                                              </button>
+                                            </div>
+                                          )}
                                         </>
                                       )}
                                     </div>
