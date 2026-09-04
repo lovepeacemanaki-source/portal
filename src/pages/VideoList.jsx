@@ -24,6 +24,7 @@ export default function VideoList() {
   const [editDrafts, setEditDrafts] = useState({})
   const [editSubmittingId, setEditSubmittingId] = useState(null)
   const [deleteSubmittingId, setDeleteSubmittingId] = useState(null)
+  const [feedbackLoadingId, setFeedbackLoadingId] = useState(null)
   const rowRefs = useRef({})
 
   function clearSessionAndGoLogin() {
@@ -83,8 +84,10 @@ export default function VideoList() {
   }
 
   function loadFeedback(videoID) {
+    setFeedbackLoadingId(videoID)
     apiGet('getFeedback', { videoID }).then((res) => {
       setFeedbackByVideo((prev) => ({ ...prev, [videoID]: res.feedback || [] }))
+      setFeedbackLoadingId((current) => (current === videoID ? null : current))
     })
   }
 
@@ -210,6 +213,7 @@ export default function VideoList() {
             const isOpen = expandedId === v.videoID
             const embedUrl = isOpen ? toEmbedUrl(v.url) : null
             const feedback = feedbackByVideo[v.videoID] || []
+            const isFeedbackLoading = feedbackLoadingId === v.videoID
 
             return (
               <div
@@ -259,10 +263,12 @@ export default function VideoList() {
                       <h2>フィードバック</h2>
 
                       <div className="feedback-list">
-                        {feedback.length === 0 && (
+                        {isFeedbackLoading && <p className="team-tag">読み込み中…</p>}
+                        {!isFeedbackLoading && feedback.length === 0 && (
                           <p className="team-tag">まだフィードバックがありません</p>
                         )}
-                        {feedback
+                        {!isFeedbackLoading &&
+                          feedback
                           .filter((f) => !f.replyTo)
                           .map((f) => {
                             const replies = feedback.filter((r) => r.replyTo === f.feedbackID)
