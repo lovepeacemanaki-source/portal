@@ -698,13 +698,15 @@ export default function Admin() {
                                   >
                                     返信
                                   </button>
-                                  <button
-                                    type="button"
-                                    className="feedback-reply-btn"
-                                    onClick={() => startFbEdit(f)}
-                                  >
-                                    編集
-                                  </button>
+                                  {f.name === ADMIN_REPLY_NAME && (
+                                    <button
+                                      type="button"
+                                      className="feedback-reply-btn"
+                                      onClick={() => startFbEdit(f)}
+                                    >
+                                      編集
+                                    </button>
+                                  )}
                                   <button
                                     type="button"
                                     className="feedback-reply-btn"
@@ -765,13 +767,15 @@ export default function Admin() {
                                     <>
                                       <div className="feedback-item-text">{r.comment}</div>
                                       <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <button
-                                          type="button"
-                                          className="feedback-reply-btn"
-                                          onClick={() => startFbEdit(r)}
-                                        >
-                                          編集
-                                        </button>
+                                        {r.name === ADMIN_REPLY_NAME && (
+                                          <button
+                                            type="button"
+                                            className="feedback-reply-btn"
+                                            onClick={() => startFbEdit(r)}
+                                          >
+                                            編集
+                                          </button>
+                                        )}
                                         <button
                                           type="button"
                                           className="feedback-reply-btn"
