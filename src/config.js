@@ -5,8 +5,9 @@ export const API_URL =
 
 // GET用（action + パラメータをクエリ文字列にして呼ぶ）
 export async function apiGet(action, params = {}) {
-  const query = new URLSearchParams({ action, ...params }).toString()
-  const res = await fetch(`${API_URL}?${query}`)
+  // ブラウザ/中継サーバーによる古いレスポンスのキャッシュを避ける
+  const query = new URLSearchParams({ action, ...params, _ts: Date.now() }).toString()
+  const res = await fetch(`${API_URL}?${query}`, { cache: 'no-store' })
   return res.json()
 }
 
