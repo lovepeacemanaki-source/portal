@@ -50,6 +50,7 @@ export default function Admin() {
 
   const [teams, setTeams] = useState([])
   const [allTeamVideos, setAllTeamVideos] = useState({})
+  const [allVideosLoading, setAllVideosLoading] = useState(true)
   const [selectedTeam, setSelectedTeam] = useState('')
   const [teamVideos, setTeamVideos] = useState([])
   const [editingId, setEditingId] = useState(null)
@@ -121,6 +122,7 @@ export default function Admin() {
   }, [authed])
 
   function loadAllTeamVideos(teamList) {
+    setAllVideosLoading(true)
     Promise.all(
       teamList.map((t) =>
         apiGet('getVideos', { team: t }).then((res) => ({ team: t, videos: res.videos || [] }))
@@ -131,6 +133,7 @@ export default function Admin() {
         map[team] = videos
       })
       setAllTeamVideos(map)
+      setAllVideosLoading(false)
     })
   }
 
@@ -616,7 +619,9 @@ export default function Admin() {
             <div key={t} className="team-overview-row">
               <div className="team-overview-name">{t}</div>
               <div className="team-overview-videos">
-                {(allTeamVideos[t] || []).length === 0 ? (
+                {allVideosLoading ? (
+                  <span className="team-tag">読み込み中…</span>
+                ) : (allTeamVideos[t] || []).length === 0 ? (
                   <span className="team-tag">動画なし</span>
                 ) : (
                   allTeamVideos[t].map((v) => (
