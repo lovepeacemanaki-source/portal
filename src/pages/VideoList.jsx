@@ -20,6 +20,10 @@ export default function VideoList() {
   const [replyingId, setReplyingId] = useState(null)
   const [replyDrafts, setReplyDrafts] = useState({})
   const [replySubmittingId, setReplySubmittingId] = useState(null)
+  const [editingCommentId, setEditingCommentId] = useState(null)
+  const [editDrafts, setEditDrafts] = useState({})
+  const [editSubmittingId, setEditSubmittingId] = useState(null)
+  const [deleteSubmittingId, setDeleteSubmittingId] = useState(null)
   const rowRefs = useRef({})
 
   function clearSessionAndGoLogin() {
@@ -125,6 +129,54 @@ export default function VideoList() {
     }
   }
 
+  function startEditComment(item) {
+    setEditingCommentId(item.feedbackID)
+    setEditDrafts((prev) => ({ ...prev, [item.feedbackID]: item.comment }))
+    setFeedbackError('')
+  }
+
+  function cancelEditComment() {
+    setEditingCommentId(null)
+  }
+
+  async function handleSaveEditComment(videoID, feedbackID) {
+    const comment = (editDrafts[feedbackID] || '').trim()
+    if (!comment) return
+    setEditSubmittingId(feedbackID)
+    setFeedbackError('')
+    try {
+      const res = await apiPost('updateFeedback', { feedbackID, comment })
+      if (!res.success) {
+        setFeedbackError('更新に失敗しました。時間をおいて再度お試しください')
+        return
+      }
+      setEditingCommentId(null)
+      loadFeedback(videoID)
+    } catch {
+      setFeedbackError('更新に失敗しました。時間をおいて再度お試しください')
+    } finally {
+      setEditSubmittingId(null)
+    }
+  }
+
+  async function handleDeleteComment(videoID, feedbackID) {
+    if (!window.confirm('このコメントを削除します。よろしいですか？')) return
+    setDeleteSubmittingId(feedbackID)
+    setFeedbackError('')
+    try {
+      const res = await apiPost('deleteFeedback', { feedbackID })
+      if (!res.success) {
+        setFeedbackError('削除に失敗しました。時間をおいて再度お試しください')
+        return
+      }
+      loadFeedback(videoID)
+    } catch {
+      setFeedbackError('削除に失敗しました。時間をおいて再度お試しください')
+    } finally {
+      setDeleteSubmittingId(null)
+    }
+  }
+
   return (
     <div className="page">
       <StarField withLogoStars />
@@ -214,6 +266,8 @@ export default function VideoList() {
                           .filter((f) => !f.replyTo)
                           .map((f) => {
                             const replies = feedback.filter((r) => r.replyTo === f.feedbackID)
+                            const isEditingThis = editingCommentId === f.feedbackID
+
                             return (
                               <div key={f.feedbackID} className="feedback-item">
                                 <div className="feedback-item-name">
@@ -222,28 +276,145 @@ export default function VideoList() {
                                     {formatDate(f.postedAt)}
                                   </span>
                                 </div>
-                                <div className="feedback-item-text">{f.comment}</div>
-                                <button
-                                  type="button"
-                                  className="feedback-reply-btn"
-                                  onClick={() =>
-                                    setReplyingId(replyingId === f.feedbackID ? null : f.feedbackID)
-                                  }
-                                >
-                                  返信
-                                </button>
 
-                                {replies.map((r) => (
-                                  <div key={r.feedbackID} className="feedback-reply">
-                                    <div className="feedback-item-name">
-                                      {r.name}
-                                      <span className="feedback-item-date">
-                                        {formatDate(r.postedAt)}
-                                      </span>
+                                {isEditingThis ? (
+                                  <div className="feedback-reply-form" style={{ margin: '0.4rem 0 0' }}>
+                                    <textarea
+                                      value={editDrafts[f.feedbackID] || ''}
+                                      onChange={(e) =>
+                                        setEditDrafts((prev) => ({
+                                          ...prev,
+                                          [f.feedbackID]: e.target.value,
+                                        }))
+                                      }
+                                    />
+                                    <div style={{ display: 'flex', gap: '0.6rem' }}>
+                                      <button
+                                        className="btn-primary"
+                                        type="button"
+                                        disabled={editSubmittingId === f.feedbackID}
+                                        onClick={() => handleSaveEditComment(v.videoID, f.feedbackID)}
+                                      >
+                                        {editSubmittingId === f.feedbackID ? '保存中…' : '保存する'}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="btn-ghost"
+                                        onClick={cancelEditComment}
+                                      >
+                                        キャンセル
+                                      </button>
                                     </div>
-                                    <div className="feedback-item-text">{r.comment}</div>
                                   </div>
-                                ))}
+                                ) : (
+                                  <>
+                                    <div className="feedback-item-text">{f.comment}</div>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                      <button
+                                        type="button"
+                                        className="feedback-reply-btn"
+                                        onClick={() =>
+                                          setReplyingId(
+                                            replyingId === f.feedbackID ? null : f.feedbackID
+                                          )
+                                        }
+                                      >
+                                        返信
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="feedback-reply-btn"
+                                        onClick={() => startEditComment(f)}
+                                      >
+                                        編集
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="feedback-reply-btn"
+                                        disabled={deleteSubmittingId === f.feedbackID}
+                                        onClick={() => handleDeleteComment(v.videoID, f.feedbackID)}
+                                      >
+                                        {deleteSubmittingId === f.feedbackID ? '削除中…' : '削除'}
+                                      </button>
+                                    </div>
+                                  </>
+                                )}
+
+                                {replies.map((r) => {
+                                  const isEditingReply = editingCommentId === r.feedbackID
+                                  return (
+                                    <div key={r.feedbackID} className="feedback-reply">
+                                      <div className="feedback-item-name">
+                                        {r.name}
+                                        <span className="feedback-item-date">
+                                          {formatDate(r.postedAt)}
+                                        </span>
+                                      </div>
+
+                                      {isEditingReply ? (
+                                        <div style={{ marginTop: '0.4rem' }}>
+                                          <textarea
+                                            className="field-input"
+                                            style={{ minHeight: '60px', marginBottom: '0.6rem' }}
+                                            value={editDrafts[r.feedbackID] || ''}
+                                            onChange={(e) =>
+                                              setEditDrafts((prev) => ({
+                                                ...prev,
+                                                [r.feedbackID]: e.target.value,
+                                              }))
+                                            }
+                                          />
+                                          <div style={{ display: 'flex', gap: '0.6rem' }}>
+                                            <button
+                                              className="btn-primary"
+                                              type="button"
+                                              disabled={editSubmittingId === r.feedbackID}
+                                              onClick={() =>
+                                                handleSaveEditComment(v.videoID, r.feedbackID)
+                                              }
+                                            >
+                                              {editSubmittingId === r.feedbackID
+                                                ? '保存中…'
+                                                : '保存する'}
+                                            </button>
+                                            <button
+                                              type="button"
+                                              className="btn-ghost"
+                                              onClick={cancelEditComment}
+                                            >
+                                              キャンセル
+                                            </button>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <>
+                                          <div className="feedback-item-text">{r.comment}</div>
+                                          <div style={{ display: 'flex', gap: '1rem' }}>
+                                            <button
+                                              type="button"
+                                              className="feedback-reply-btn"
+                                              onClick={() => startEditComment(r)}
+                                            >
+                                              編集
+                                            </button>
+                                            <button
+                                              type="button"
+                                              className="feedback-reply-btn"
+                                              disabled={deleteSubmittingId === r.feedbackID}
+                                              onClick={() =>
+                                                handleDeleteComment(v.videoID, r.feedbackID)
+                                              }
+                                            >
+                                              {deleteSubmittingId === r.feedbackID
+                                                ? '削除中…'
+                                                : '削除'}
+                                            </button>
+                                          </div>
+                                        </>
+                                      )}
+                                    </div>
+                                  )
+                                })}
 
                                 {replyingId === f.feedbackID && (
                                   <div className="feedback-reply-form">

@@ -3,10 +3,23 @@ import { useNavigate } from 'react-router-dom'
 import { apiGet } from '../config.js'
 import StarField from '../components/StarField.jsx'
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+// GAS側の一時的な読み込み不調に備えて、ログインだけは1回だけ自動で再試行する
+async function loginWithRetry(action, params) {
+  const first = await apiGet(action, params)
+  if (first.success) return first
+  await sleep(700)
+  return apiGet(action, params)
+}
+
 export default function Login() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1) // 1: チーム+パスワード, 2: 名前選択
   const [teams, setTeams] = useState([])
+  const [teamsLoading, setTeamsLoading] = useState(true)
   const [team, setTeam] = useState('')
   const [password, setPassword] = useState('')
   const [members, setMembers] = useState([])
@@ -16,7 +29,11 @@ export default function Login() {
 
   useEffect(() => {
     apiGet('getTeams').then((res) => {
-      setTeams(res.teams || [])
+      const list = res.teams || []
+      // 「管理人」は常に一番下に表示する
+      const sorted = [...list.filter((t) => t !== '管理人'), ...list.filter((t) => t === '管理人')]
+      setTeams(sorted)
+      setTeamsLoading(false)
     })
   }, [])
 
@@ -30,7 +47,7 @@ export default function Login() {
     setLoading(true)
     try {
       if (team.trim() === '管理人') {
-        const res = await apiGet('login', { team: team.trim(), password: password.trim() })
+        const res = await loginWithRetry('login', { team: team.trim(), password: password.trim() })
         if (res.success) {
           localStorage.setItem('lp_admin', 'true')
           localStorage.setItem('lp_admin_login_at', String(Date.now()))
@@ -42,7 +59,10 @@ export default function Login() {
         return
       }
 
-      const res = await apiGet('loginWithMembers', { team: team.trim(), password: password.trim() })
+      const res = await loginWithRetry('loginWithMembers', {
+        team: team.trim(),
+        password: password.trim(),
+      })
       if (res.success) {
         setMembers(res.members || [])
         setStep(2)
@@ -91,8 +111,9 @@ export default function Login() {
                 className="field-input"
                 value={team}
                 onChange={(e) => setTeam(e.target.value)}
+                disabled={teamsLoading}
               >
-                <option value="">選択してください</option>
+                <option value="">{teamsLoading ? '読み込み中…' : '選択してください'}</option>
                 {teams.map((t) => (
                   <option key={t} value={t}>
                     {t}
@@ -111,7 +132,7 @@ export default function Login() {
               />
             </div>
             {error && <p className="error-text">{error}</p>}
-            <button className="btn-primary" type="submit" disabled={loading}>
+            <button className="btn-primary" type="submit" disabled={loading || teamsLoading}>
               {loading ? '確認中…' : 'ログイン'}
             </button>
           </form>

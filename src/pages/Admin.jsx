@@ -82,6 +82,10 @@ export default function Admin() {
   const [fbReplyDrafts, setFbReplyDrafts] = useState({})
   const [fbReplySubmittingId, setFbReplySubmittingId] = useState(null)
   const [fbError, setFbError] = useState('')
+  const [fbEditingId, setFbEditingId] = useState(null)
+  const [fbEditDrafts, setFbEditDrafts] = useState({})
+  const [fbEditSubmittingId, setFbEditSubmittingId] = useState(null)
+  const [fbDeleteSubmittingId, setFbDeleteSubmittingId] = useState(null)
 
   // 管理画面専用の白背景テーマをbodyに適用(ログイン後のみ)
   useEffect(() => {
@@ -168,6 +172,54 @@ export default function Admin() {
       setFbFeedback(res.feedback || [])
       setFbLoading(false)
     })
+  }
+
+  function startFbEdit(item) {
+    setFbEditingId(item.feedbackID)
+    setFbEditDrafts((prev) => ({ ...prev, [item.feedbackID]: item.comment }))
+    setFbError('')
+  }
+
+  function cancelFbEdit() {
+    setFbEditingId(null)
+  }
+
+  async function handleFbSaveEdit(videoID, feedbackID) {
+    const comment = (fbEditDrafts[feedbackID] || '').trim()
+    if (!comment) return
+    setFbEditSubmittingId(feedbackID)
+    setFbError('')
+    try {
+      const res = await apiPost('updateFeedback', { feedbackID, comment })
+      if (!res.success) {
+        setFbError('更新に失敗しました。時間をおいて再度お試しください')
+        return
+      }
+      setFbEditingId(null)
+      loadFbFeedback(videoID)
+    } catch {
+      setFbError('更新に失敗しました。時間をおいて再度お試しください')
+    } finally {
+      setFbEditSubmittingId(null)
+    }
+  }
+
+  async function handleFbDelete(videoID, feedbackID) {
+    if (!window.confirm('このコメントを削除します。よろしいですか？')) return
+    setFbDeleteSubmittingId(feedbackID)
+    setFbError('')
+    try {
+      const res = await apiPost('deleteFeedback', { feedbackID })
+      if (!res.success) {
+        setFbError('削除に失敗しました。時間をおいて再度お試しください')
+        return
+      }
+      loadFbFeedback(videoID)
+    } catch {
+      setFbError('削除に失敗しました。時間をおいて再度お試しください')
+    } finally {
+      setFbDeleteSubmittingId(null)
+    }
   }
 
   async function handleFbReply(videoID, parentId) {
@@ -596,6 +648,7 @@ export default function Admin() {
                       .filter((f) => !f.replyTo)
                       .map((f) => {
                         const replies = fbFeedback.filter((r) => r.replyTo === f.feedbackID)
+                        const isEditingThis = fbEditingId === f.feedbackID
                         return (
                           <div key={f.feedbackID} className="feedback-item">
                             <div className="feedback-item-name">
@@ -604,30 +657,137 @@ export default function Admin() {
                                 {formatDate(f.postedAt)}
                               </span>
                             </div>
-                            <div className="feedback-item-text">{f.comment}</div>
-                            <button
-                              type="button"
-                              className="feedback-reply-btn"
-                              onClick={() =>
-                                setFbReplyingId(
-                                  fbReplyingId === f.feedbackID ? null : f.feedbackID
-                                )
-                              }
-                            >
-                              返信
-                            </button>
 
-                            {replies.map((r) => (
-                              <div key={r.feedbackID} className="feedback-reply">
-                                <div className="feedback-item-name">
-                                  {r.name}
-                                  <span className="feedback-item-date">
-                                    {formatDate(r.postedAt)}
-                                  </span>
+                            {isEditingThis ? (
+                              <div className="feedback-reply-form" style={{ margin: '0.4rem 0 0' }}>
+                                <textarea
+                                  value={fbEditDrafts[f.feedbackID] || ''}
+                                  onChange={(e) =>
+                                    setFbEditDrafts((prev) => ({
+                                      ...prev,
+                                      [f.feedbackID]: e.target.value,
+                                    }))
+                                  }
+                                />
+                                <div style={{ display: 'flex', gap: '0.6rem' }}>
+                                  <button
+                                    className="btn-primary"
+                                    type="button"
+                                    disabled={fbEditSubmittingId === f.feedbackID}
+                                    onClick={() => handleFbSaveEdit(fbVideoId, f.feedbackID)}
+                                  >
+                                    {fbEditSubmittingId === f.feedbackID ? '保存中…' : '保存する'}
+                                  </button>
+                                  <button type="button" className="btn-ghost" onClick={cancelFbEdit}>
+                                    キャンセル
+                                  </button>
                                 </div>
-                                <div className="feedback-item-text">{r.comment}</div>
                               </div>
-                            ))}
+                            ) : (
+                              <>
+                                <div className="feedback-item-text">{f.comment}</div>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                  <button
+                                    type="button"
+                                    className="feedback-reply-btn"
+                                    onClick={() =>
+                                      setFbReplyingId(
+                                        fbReplyingId === f.feedbackID ? null : f.feedbackID
+                                      )
+                                    }
+                                  >
+                                    返信
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="feedback-reply-btn"
+                                    onClick={() => startFbEdit(f)}
+                                  >
+                                    編集
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="feedback-reply-btn"
+                                    disabled={fbDeleteSubmittingId === f.feedbackID}
+                                    onClick={() => handleFbDelete(fbVideoId, f.feedbackID)}
+                                  >
+                                    {fbDeleteSubmittingId === f.feedbackID ? '削除中…' : '削除'}
+                                  </button>
+                                </div>
+                              </>
+                            )}
+
+                            {replies.map((r) => {
+                              const isEditingReply = fbEditingId === r.feedbackID
+                              return (
+                                <div key={r.feedbackID} className="feedback-reply">
+                                  <div className="feedback-item-name">
+                                    {r.name}
+                                    <span className="feedback-item-date">
+                                      {formatDate(r.postedAt)}
+                                    </span>
+                                  </div>
+
+                                  {isEditingReply ? (
+                                    <div style={{ marginTop: '0.4rem' }}>
+                                      <textarea
+                                        className="field-input"
+                                        style={{ minHeight: '60px', marginBottom: '0.6rem' }}
+                                        value={fbEditDrafts[r.feedbackID] || ''}
+                                        onChange={(e) =>
+                                          setFbEditDrafts((prev) => ({
+                                            ...prev,
+                                            [r.feedbackID]: e.target.value,
+                                          }))
+                                        }
+                                      />
+                                      <div style={{ display: 'flex', gap: '0.6rem' }}>
+                                        <button
+                                          className="btn-primary"
+                                          type="button"
+                                          disabled={fbEditSubmittingId === r.feedbackID}
+                                          onClick={() => handleFbSaveEdit(fbVideoId, r.feedbackID)}
+                                        >
+                                          {fbEditSubmittingId === r.feedbackID
+                                            ? '保存中…'
+                                            : '保存する'}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn-ghost"
+                                          onClick={cancelFbEdit}
+                                        >
+                                          キャンセル
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <div className="feedback-item-text">{r.comment}</div>
+                                      <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <button
+                                          type="button"
+                                          className="feedback-reply-btn"
+                                          onClick={() => startFbEdit(r)}
+                                        >
+                                          編集
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="feedback-reply-btn"
+                                          disabled={fbDeleteSubmittingId === r.feedbackID}
+                                          onClick={() => handleFbDelete(fbVideoId, r.feedbackID)}
+                                        >
+                                          {fbDeleteSubmittingId === r.feedbackID
+                                            ? '削除中…'
+                                            : '削除'}
+                                        </button>
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                              )
+                            })}
 
                             {fbReplyingId === f.feedbackID && (
                               <div className="feedback-reply-form">
