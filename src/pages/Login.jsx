@@ -51,6 +51,7 @@ export default function Login() {
         if (res.success) {
           localStorage.setItem('lp_admin', 'true')
           localStorage.setItem('lp_admin_login_at', String(Date.now()))
+          localStorage.setItem('lp_token', res.token || '')
           navigate('/admin')
           return
         }
@@ -64,6 +65,7 @@ export default function Login() {
         password: password.trim(),
       })
       if (res.success) {
+        localStorage.setItem('lp_token', res.token || '')
         setMembers(res.members || [])
         setStep(2)
       } else {

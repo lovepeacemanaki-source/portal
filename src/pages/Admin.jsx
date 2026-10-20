@@ -40,6 +40,7 @@ export default function Admin() {
     if (expired) {
       localStorage.removeItem('lp_admin')
       localStorage.removeItem('lp_admin_login_at')
+      localStorage.removeItem('lp_token')
       return false
     }
     return localStorage.getItem('lp_admin') === 'true'
@@ -106,6 +107,7 @@ export default function Admin() {
     const timer = setTimeout(() => {
       localStorage.removeItem('lp_admin')
       localStorage.removeItem('lp_admin_login_at')
+      localStorage.removeItem('lp_token')
       setAuthed(false)
     }, Math.max(remaining, 0))
     return () => clearTimeout(timer)
@@ -440,6 +442,7 @@ export default function Admin() {
       if (res.success) {
         localStorage.setItem('lp_admin', 'true')
         localStorage.setItem('lp_admin_login_at', String(Date.now()))
+        localStorage.setItem('lp_token', res.token || '')
         setAuthed(true)
       } else {
         setAuthError('パスワードが違います')
@@ -541,6 +544,7 @@ export default function Admin() {
   function handleLogout() {
     localStorage.removeItem('lp_admin')
     localStorage.removeItem('lp_admin_login_at')
+    localStorage.removeItem('lp_token')
     navigate('/')
   }
 

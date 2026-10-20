@@ -12,10 +12,12 @@ export async function apiGet(action, params = {}) {
 }
 
 // POST用（action + データをJSONで送る）
+// 書き込み系はログイン時に発行されたトークンを自動で添える（セッション認証）
 export async function apiPost(action, data = {}) {
+  const token = localStorage.getItem('lp_token') || ''
   const res = await fetch(API_URL, {
     method: 'POST',
-    body: JSON.stringify({ action, ...data }),
+    body: JSON.stringify({ action, token, ...data }),
   })
   return res.json()
 }

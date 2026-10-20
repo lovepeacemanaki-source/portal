@@ -31,6 +31,7 @@ export default function VideoList() {
     localStorage.removeItem('lp_team')
     localStorage.removeItem('lp_member')
     localStorage.removeItem('lp_login_at')
+    localStorage.removeItem('lp_token')
     navigate('/')
   }
 
@@ -59,6 +60,7 @@ export default function VideoList() {
     localStorage.removeItem('lp_team')
     localStorage.removeItem('lp_member')
     localStorage.removeItem('lp_login_at')
+    localStorage.removeItem('lp_token')
     navigate('/')
   }
 
