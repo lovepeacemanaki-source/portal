@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiGet, apiPost } from '../config.js'
 import StarField from '../components/StarField.jsx'
+import SectionCard from '../components/SectionCard.jsx'
+import DiaryCard from '../components/DiaryCard.jsx'
 
 const SESSION_MS = 10 * 60 * 1000 // 10分でセッション切れ
 
@@ -185,6 +187,9 @@ export default function VideoList() {
   return (
     <div className="page">
       <StarField withLogoStars />
+      <button className="logout-link" onClick={handleLogout}>
+        ログアウト
+      </button>
       <div style={{ textAlign: 'center', marginTop: '-2.5rem', marginBottom: '1.5rem' }}>
         <img
           src="/login-logo.png"
@@ -193,24 +198,22 @@ export default function VideoList() {
         />
       </div>
 
-      <div className="page-header">
-        <div>
-          <h1>動画一覧</h1>
-          <div className="team-tag">{team} ・ {member} さん</div>
-        </div>
-        <button className="btn-ghost" onClick={handleLogout}>
-          ログアウト
-        </button>
+      <div style={{ textAlign: 'center', marginBottom: '1.8rem' }}>
+        <div className="team-tag">{team}</div>
+        <div className="team-tag">{member} さん</div>
       </div>
 
-      {loading && <p className="team-tag">読み込み中…</p>}
+      <DiaryCard team={team} member={member} />
 
-      {!loading && videos.length === 0 && (
-        <div className="empty-state">まだ動画が投稿されていません</div>
-      )}
+      <SectionCard icon="video" title="動画一覧">
+        {loading && <p className="team-tag">読み込み中…</p>}
 
-      {!loading && videos.length > 0 && (
-        <div className="video-list-vertical">
+        {!loading && videos.length === 0 && (
+          <div className="empty-state">まだ動画が投稿されていません</div>
+        )}
+
+        {!loading && videos.length > 0 && (
+          <div className="video-list-vertical">
           {videos.map((v) => {
             const isOpen = expandedId === v.videoID
             const embedUrl = isOpen ? toEmbedUrl(v.url) : null
@@ -485,8 +488,9 @@ export default function VideoList() {
               </div>
             )
           })}
-        </div>
-      )}
+          </div>
+        )}
+      </SectionCard>
     </div>
   )
 }
