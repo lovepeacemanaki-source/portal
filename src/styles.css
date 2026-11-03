@@ -20,6 +20,8 @@
   --radius-sm: 8px;
   --font-display: 'Fraunces', serif;
   --font-body: 'Work Sans', sans-serif;
+  /* ロゴ画像の背景を参考にした、薄いピンク〜ブルーの柔らかいグラデーション(明るいカード面全般で使う) */
+  --pastel-gradient: linear-gradient(160deg, #fdf0ee 0%, #fbfbfa 45%, #eaf1fb 100%);
 }
 
 /* 管理画面専用テーマ(ほんのり水色がかった白背景・紺文字) */
@@ -418,13 +420,29 @@ button {
 }
 
 /* ===== カード共通(動画一覧・自己との対話) ===== */
+/* 背景の星空は紺のまま、カードの中身だけロゴと同じ色味の明るいグラデーションにして見やすくする */
 
 .section-card {
-  background: var(--field-bg);
-  border: 1px solid var(--line);
+  position: relative;
+  z-index: 1;
+  background: var(--pastel-gradient);
+  border: 1px solid rgba(4, 33, 103, 0.1);
   border-radius: var(--radius-lg);
   margin-bottom: 1.4rem;
   overflow: hidden;
+  box-shadow: 0 10px 30px rgba(2, 12, 40, 0.25);
+  --text: #042167;
+  --text-dim: rgba(4, 33, 103, 0.68);
+  --text-faint: rgba(4, 33, 103, 0.42);
+  --line: rgba(4, 33, 103, 0.14);
+  --field-bg: rgba(255, 255, 255, 0.55);
+  --surface: transparent;
+  --surface-hover: rgba(255, 255, 255, 0.5);
+  --accent-standout: #2f5dff;
+  --accent-standout-rgb: 47, 93, 255;
+  --accent-btn: #2f5dff;
+  --accent-btn-rgb: 47, 93, 255;
+  --btn-text: #ffffff;
 }
 
 .section-card-header {
@@ -460,7 +478,7 @@ button {
 
 .section-card-title {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 600;
   font-size: 1.05rem;
   color: var(--text);
   white-space: nowrap;
@@ -657,7 +675,7 @@ button {
 }
 
 .video-row-expanded {
-  background: #ffffff;
+  background: var(--pastel-gradient);
   color: #042167;
   padding: 1.3rem 1.3rem 1.5rem;
   border-top: 1px solid rgba(4, 33, 103, 0.12);
@@ -665,7 +683,7 @@ button {
   --text-dim: rgba(4, 33, 103, 0.66);
   --text-faint: rgba(4, 33, 103, 0.4);
   --line: rgba(4, 33, 103, 0.15);
-  --field-bg: rgba(4, 33, 103, 0.045);
+  --field-bg: rgba(255, 255, 255, 0.6);
   --accent-standout: #2f5dff;
   --accent-standout-rgb: 47, 93, 255;
   --accent-btn: #2f5dff;
