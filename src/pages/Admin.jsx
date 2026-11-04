@@ -64,6 +64,7 @@ export default function Admin() {
 
   const [memberTeam, setMemberTeam] = useState('')
   const [memberName, setMemberName] = useState('')
+  const [memberPassword, setMemberPassword] = useState('')
   const [teamMembers, setTeamMembers] = useState([])
   const [editingMemberId, setEditingMemberId] = useState(null)
   const [memberSubmitting, setMemberSubmitting] = useState(false)
@@ -166,7 +167,8 @@ export default function Admin() {
   }, [memberTeam])
 
   function loadTeamMembers() {
-    apiGet('getMembers', { team: memberTeam }).then((res) => {
+    const token = localStorage.getItem('lp_token') || ''
+    apiGet('getMembers', { team: memberTeam, token }).then((res) => {
       setTeamMembers(res.members || [])
     })
   }
@@ -365,8 +367,8 @@ export default function Admin() {
     e.preventDefault()
     setMemberMessage('')
     setMemberError('')
-    if (!memberTeam || !memberName.trim()) {
-      setMemberError('チームと名前を入力してください')
+    if (!memberTeam || !memberName.trim() || !memberPassword.trim()) {
+      setMemberError('チーム・名前・パスワードを入力してください')
       return
     }
     setMemberSubmitting(true)
@@ -375,6 +377,7 @@ export default function Admin() {
         const res = await apiPost('updateMember', {
           memberID: editingMemberId,
           name: memberName.trim(),
+          password: memberPassword.trim(),
         })
         if (!res.success) {
           setMemberError(res.message || '更新に失敗しました')
@@ -383,7 +386,11 @@ export default function Admin() {
         setMemberMessage(`「${memberName.trim()}」に更新しました`)
         setEditingMemberId(null)
       } else {
-        const res = await apiPost('postMember', { team: memberTeam, name: memberName.trim() })
+        const res = await apiPost('postMember', {
+          team: memberTeam,
+          name: memberName.trim(),
+          password: memberPassword.trim(),
+        })
         if (!res.success) {
           setMemberError(res.message || '追加に失敗しました')
           return
@@ -391,6 +398,7 @@ export default function Admin() {
         setMemberMessage(`「${memberName.trim()}」を${memberTeam}に追加しました`)
       }
       setMemberName('')
+      setMemberPassword('')
       loadTeamMembers()
     } catch {
       setMemberError('保存に失敗しました。時間をおいて再度お試しください')
@@ -402,6 +410,7 @@ export default function Admin() {
   function startEditMember(member) {
     setEditingMemberId(member.memberID)
     setMemberName(member.name)
+    setMemberPassword(member.password || '')
     setMemberMessage('')
     setMemberError('')
   }
@@ -409,6 +418,7 @@ export default function Admin() {
   function cancelEditMember() {
     setEditingMemberId(null)
     setMemberName('')
+    setMemberPassword('')
     setMemberError('')
   }
 
@@ -959,7 +969,7 @@ export default function Admin() {
 
           {memberTeam && teamMembers.length > 0 && (
             <div>
-              <label className="field-label">{memberTeam}の現在のメンバー（クリックで編集）</label>
+              <label className="field-label">{memberTeam}の現在のメンバー（クリックでパスワード確認・編集）</label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {teamMembers.map((m) => (
                   <button
@@ -975,6 +985,9 @@ export default function Admin() {
                     }}
                   >
                     {m.name}
+                    <span style={{ color: 'var(--text-faint)', marginLeft: '0.6rem', fontSize: '0.8rem' }}>
+                      パスワード: {m.password || '(未設定)'}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -982,13 +995,26 @@ export default function Admin() {
           )}
 
           <div>
-            <label className="field-label">新規メンバー名</label>
+            <label className="field-label">{editingMemberId ? '名前' : '新規メンバー名'}</label>
             <input
               className="field-input"
               type="text"
               value={memberName}
               onChange={(e) => setMemberName(e.target.value)}
               placeholder="例）田中"
+            />
+          </div>
+
+          <div>
+            <label className="field-label">
+              パスワード{editingMemberId ? '（変更する場合はここで書き換えてください）' : ''}
+            </label>
+            <input
+              className="field-input"
+              type="text"
+              value={memberPassword}
+              onChange={(e) => setMemberPassword(e.target.value)}
+              placeholder="本人専用ログイン用のパスワード"
             />
           </div>
 
