@@ -72,7 +72,6 @@ export default function Admin() {
   const [memberError, setMemberError] = useState('')
 
   const [newTeamName, setNewTeamName] = useState('')
-  const [newTeamPassword, setNewTeamPassword] = useState('')
   const [editingTeamOriginal, setEditingTeamOriginal] = useState(null)
   const [teamSubmitting, setTeamSubmitting] = useState(false)
   const [teamMessage, setTeamMessage] = useState('')
@@ -270,8 +269,8 @@ export default function Admin() {
     e.preventDefault()
     setTeamMessage('')
     setTeamError('')
-    if (!newTeamName.trim() || !newTeamPassword.trim()) {
-      setTeamError('チーム名とパスワードを入力してください')
+    if (!newTeamName.trim()) {
+      setTeamError('チーム名を入力してください')
       return
     }
     setTeamSubmitting(true)
@@ -280,13 +279,11 @@ export default function Admin() {
         const res = await apiPost('updateTeam', {
           originalName: editingTeamOriginal,
           teamName: newTeamName.trim(),
-          password: newTeamPassword.trim(),
         })
         if (res.success) {
           setTeamMessage(`「${newTeamName.trim()}」を更新しました`)
           setEditingTeamOriginal(null)
           setNewTeamName('')
-          setNewTeamPassword('')
           const teamsRes = await apiGet('getTeams')
           const teamList = (teamsRes.teams || []).filter((t) => t !== '管理人')
           setTeams(teamList)
@@ -299,12 +296,10 @@ export default function Admin() {
 
       const res = await apiPost('postTeam', {
         teamName: newTeamName.trim(),
-        password: newTeamPassword.trim(),
       })
       if (res.success) {
         setTeamMessage(`「${newTeamName.trim()}」を追加しました`)
         setNewTeamName('')
-        setNewTeamPassword('')
         const teamsRes = await apiGet('getTeams')
         const teamList = (teamsRes.teams || []).filter((t) => t !== '管理人')
         setTeams(teamList)
@@ -322,7 +317,6 @@ export default function Admin() {
   function startEditTeam(teamName) {
     setEditingTeamOriginal(teamName)
     setNewTeamName(teamName)
-    setNewTeamPassword('')
     setTeamMessage('')
     setTeamError('')
   }
@@ -330,7 +324,6 @@ export default function Admin() {
   function cancelEditTeam() {
     setEditingTeamOriginal(null)
     setNewTeamName('')
-    setNewTeamPassword('')
     setTeamError('')
   }
 
@@ -1071,26 +1064,13 @@ export default function Admin() {
           )}
 
           <div>
-            <label className="field-label">新規チーム名</label>
+            <label className="field-label">{editingTeamOriginal ? 'チーム名' : '新規チーム名'}</label>
             <input
               className="field-input"
               type="text"
               value={newTeamName}
               onChange={(e) => setNewTeamName(e.target.value)}
               placeholder="例）名古屋チーム"
-            />
-          </div>
-
-          <div>
-            <label className="field-label">
-              パスワード{editingTeamOriginal ? '（変更する場合は入力し直してください）' : ''}
-            </label>
-            <input
-              className="field-input"
-              type="text"
-              value={newTeamPassword}
-              onChange={(e) => setNewTeamPassword(e.target.value)}
-              placeholder="このチーム用のパスワード"
             />
           </div>
 
