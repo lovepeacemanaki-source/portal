@@ -1,12 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiGet, apiPost } from '../config.js'
 
 const ADMIN_REPLY_NAME = '吉井孝'
 const SESSION_MS = 10 * 60 * 1000 // 10分でセッション切れ
 
-function AdminCard({ title, defaultOpen = false, children }) {
+function AdminCard({ title, defaultOpen = false, openSignal, children }) {
   const [open, setOpen] = useState(defaultOpen)
+
+  // openSignal が変化するたび(0以外)に強制的に開く(未返信コメントのアラートから飛んで来た時用)
+  useEffect(() => {
+    if (openSignal) setOpen(true)
+  }, [openSignal])
+
   return (
     <div className="admin-card">
       <button type="button" className="admin-card-header" onClick={() => setOpen(!open)}>
@@ -30,6 +36,19 @@ function AdminCard({ title, defaultOpen = false, children }) {
       {open && <div className="admin-card-body">{children}</div>}
     </div>
   )
+}
+
+// "3時間前" / "2日前" のような相対表示
+function formatRelativeTime(value) {
+  if (!value) return ''
+  const diffMs = Date.now() - new Date(value).getTime()
+  const minutes = Math.floor(diffMs / 60000)
+  if (minutes < 1) return 'たった今'
+  if (minutes < 60) return `${minutes}分前`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}時間前`
+  const days = Math.floor(hours / 24)
+  return `${days}日前`
 }
 
 export default function Admin() {
@@ -77,6 +96,11 @@ export default function Admin() {
   const [teamMessage, setTeamMessage] = useState('')
   const [teamError, setTeamError] = useState('')
 
+  const [pending, setPending] = useState([])
+  const [pendingLoading, setPendingLoading] = useState(true)
+  const [openCard1Signal, setOpenCard1Signal] = useState(0)
+  const card1Ref = useRef(null)
+
   const [fbVideoId, setFbVideoId] = useState('')
   const [fbFeedback, setFbFeedback] = useState([])
   const [fbLoading, setFbLoading] = useState(false)
@@ -120,8 +144,28 @@ export default function Admin() {
         setTeams(teamList)
         loadAllTeamVideos(teamList)
       })
+      loadPending()
     }
   }, [authed])
+
+  function loadPending() {
+    const token = localStorage.getItem('lp_token') || ''
+    setPendingLoading(true)
+    apiGet('getPendingFeedback', { token }).then((res) => {
+      setPending(res.success ? res.pending || [] : [])
+      setPendingLoading(false)
+    })
+  }
+
+  // アラートの項目をクリックした時: 「全チームの動画一覧」を開いて、その動画のコメント欄を表示する
+  function handlePendingClick(item) {
+    setFbVideoId(item.videoID)
+    loadFbFeedback(item.videoID)
+    setOpenCard1Signal((n) => n + 1)
+    setTimeout(() => {
+      card1Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
 
   function loadAllTeamVideos(teamList) {
     setAllVideosLoading(true)
@@ -221,6 +265,7 @@ export default function Admin() {
         return
       }
       loadFbFeedback(videoID)
+      loadPending()
     } catch {
       setFbError('削除に失敗しました。時間をおいて再度お試しください')
     } finally {
@@ -247,6 +292,7 @@ export default function Admin() {
       setFbReplyDrafts((prev) => ({ ...prev, [parentId]: '' }))
       setFbReplyingId(null)
       loadFbFeedback(videoID)
+      loadPending()
     } catch {
       setFbError('送信に失敗しました。時間をおいて再度お試しください')
     } finally {
@@ -620,7 +666,47 @@ export default function Admin() {
         </button>
       </div>
 
-      <AdminCard title="全チームの動画一覧">
+      {!pendingLoading && pending.length > 0 && (
+        <div className="pending-alert">
+          <div className="pending-alert-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 2a6 6 0 00-6 6v3.09c0 .68-.24 1.34-.68 1.86L4 15h16l-1.32-2.05a3 3 0 01-.68-1.86V8a6 6 0 00-6-6z"
+                stroke="var(--accent-rose)"
+                strokeWidth="1.6"
+                strokeLinejoin="round"
+              />
+              <path d="M9 18a3 3 0 006 0" stroke="var(--accent-rose)" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
+            <span className="pending-alert-title">未返信のコメント</span>
+            <span className="pending-alert-count">{pending.length}件</span>
+          </div>
+          <div className="pending-alert-list">
+            {pending.map((p) => (
+              <button
+                key={p.feedbackID}
+                type="button"
+                className="pending-alert-item"
+                onClick={() => handlePendingClick(p)}
+              >
+                <div className="pending-alert-item-main">
+                  <p className="pending-alert-item-sub">
+                    {p.team} ・ {p.name}
+                  </p>
+                  <p className="pending-alert-item-text">
+                    「{p.videoTitle}」に{p.comment}
+                  </p>
+                </div>
+                <span className="pending-alert-item-time">{formatRelativeTime(p.postedAt)}</span>
+              </button>
+            ))}
+          </div>
+          <p className="pending-alert-hint">クリックするとその動画のコメント欄が開きます。返信すると一覧から消えます。</p>
+        </div>
+      )}
+
+      <div ref={card1Ref}>
+      <AdminCard title="全チームの動画一覧" openSignal={openCard1Signal}>
         <div className="team-overview">
           {teams.map((t) => (
             <div key={t} className="team-overview-row">
@@ -837,6 +923,7 @@ export default function Admin() {
           ))}
         </div>
       </AdminCard>
+      </div>
 
       <AdminCard title="動画を追加・編集">
         <form className="admin-form" onSubmit={handlePostVideo}>

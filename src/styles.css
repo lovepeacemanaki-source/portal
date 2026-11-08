@@ -944,6 +944,93 @@ button {
   border-top: 1px solid rgba(4, 33, 103, 0.1);
 }
 
+/* 未返信コメントのアラート(管理画面TOP) */
+.pending-alert {
+  background: #fff6f6;
+  border: 1px solid rgba(232, 140, 165, 0.35);
+  border-radius: 16px;
+  padding: 1.1rem 1.3rem 1.2rem;
+  margin-bottom: 1.3rem;
+}
+
+.pending-alert-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.pending-alert-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #042167;
+}
+
+.pending-alert-count {
+  background: var(--accent-rose);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+}
+
+.pending-alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pending-alert-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  background: #ffffff;
+  border: 1px solid rgba(4, 33, 103, 0.12);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.pending-alert-item:hover {
+  border-color: var(--accent-rose);
+}
+
+.pending-alert-item-main {
+  min-width: 0;
+}
+
+.pending-alert-item-sub {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(4, 33, 103, 0.6);
+}
+
+.pending-alert-item-text {
+  margin: 0.15rem 0 0;
+  font-size: 0.9rem;
+  color: #042167;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pending-alert-item-time {
+  font-size: 0.75rem;
+  color: rgba(4, 33, 103, 0.45);
+  white-space: nowrap;
+}
+
+.pending-alert-hint {
+  margin: 0.7rem 0 0;
+  font-size: 0.75rem;
+  color: rgba(4, 33, 103, 0.5);
+}
+
 .team-overview {
   display: flex;
   flex-direction: column;
