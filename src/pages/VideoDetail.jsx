@@ -100,7 +100,7 @@ export default function VideoDetail() {
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="感想やコメントを書いてください"
+            placeholder="実践した上で、分からないことがありましたら、お書きください"
           />
           {error && <p className="error-text">{error}</p>}
           <button className="btn-primary" type="submit" disabled={submitting}>

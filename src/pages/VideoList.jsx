@@ -470,7 +470,7 @@ export default function VideoList() {
                               [v.videoID]: e.target.value,
                             }))
                           }
-                          placeholder="感想やコメントを書いてください"
+                          placeholder="実践した上で、分からないことがありましたら、お書きください"
                         />
                         {feedbackError && <p className="error-text">{feedbackError}</p>}
                         <button
