@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { apiGet, apiPost } from '../config.js'
 
 const ADMIN_REPLY_NAME = '吉井孝'
-const SESSION_MS = 10 * 60 * 1000 // 10分でセッション切れ
 
 function AdminCard({ title, defaultOpen = false, openSignal, children }) {
   const [open, setOpen] = useState(defaultOpen)
@@ -53,17 +52,7 @@ function formatRelativeTime(value) {
 
 export default function Admin() {
   const navigate = useNavigate()
-  const [authed, setAuthed] = useState(() => {
-    const loginAt = Number(localStorage.getItem('lp_admin_login_at') || 0)
-    const expired = !loginAt || Date.now() - loginAt > SESSION_MS
-    if (expired) {
-      localStorage.removeItem('lp_admin')
-      localStorage.removeItem('lp_admin_login_at')
-      localStorage.removeItem('lp_token')
-      return false
-    }
-    return localStorage.getItem('lp_admin') === 'true'
-  })
+  const [authed, setAuthed] = useState(() => localStorage.getItem('lp_admin') === 'true')
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
   const [checking, setChecking] = useState(false)
@@ -121,20 +110,6 @@ export default function Admin() {
       document.body.classList.remove('admin-theme')
     }
     return () => document.body.classList.remove('admin-theme')
-  }, [authed])
-
-  // 表示中に10分を迎えたら、その場でログイン画面に戻す
-  useEffect(() => {
-    if (!authed) return
-    const loginAt = Number(localStorage.getItem('lp_admin_login_at') || 0)
-    const remaining = SESSION_MS - (Date.now() - loginAt)
-    const timer = setTimeout(() => {
-      localStorage.removeItem('lp_admin')
-      localStorage.removeItem('lp_admin_login_at')
-      localStorage.removeItem('lp_token')
-      setAuthed(false)
-    }, Math.max(remaining, 0))
-    return () => clearTimeout(timer)
   }, [authed])
 
   useEffect(() => {

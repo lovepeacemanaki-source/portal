@@ -5,8 +5,6 @@ import StarField from '../components/StarField.jsx'
 import SectionCard from '../components/SectionCard.jsx'
 import DiaryCard from '../components/DiaryCard.jsx'
 
-const SESSION_MS = 10 * 60 * 1000 // 10分でセッション切れ
-
 export default function VideoList() {
   const navigate = useNavigate()
   const [videos, setVideos] = useState([])
@@ -38,10 +36,7 @@ export default function VideoList() {
   }
 
   useEffect(() => {
-    const loginAt = Number(localStorage.getItem('lp_login_at') || 0)
-    const expired = !loginAt || Date.now() - loginAt > SESSION_MS
-
-    if (!team || !member || expired) {
+    if (!team || !member) {
       clearSessionAndGoLogin()
       return
     }
@@ -50,11 +45,6 @@ export default function VideoList() {
       setVideos(res.videos || [])
       setLoading(false)
     })
-
-    // 表示中に10分を迎えたら、その場でログイン画面に戻す
-    const remaining = SESSION_MS - (Date.now() - loginAt)
-    const timer = setTimeout(clearSessionAndGoLogin, remaining)
-    return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [team, member, navigate])
 
