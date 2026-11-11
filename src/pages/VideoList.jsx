@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiGet, apiPost } from '../config.js'
+import { apiGetCached, apiPost, clearApiCache } from '../config.js'
 import StarField from '../components/StarField.jsx'
 import SectionCard from '../components/SectionCard.jsx'
 import DiaryCard from '../components/DiaryCard.jsx'
@@ -9,6 +9,8 @@ export default function VideoList() {
   const navigate = useNavigate()
   const [videos, setVideos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [reloadKey, setReloadKey] = useState(0)
   const team = localStorage.getItem('lp_team')
   const member = localStorage.getItem('lp_member')
 
@@ -32,6 +34,7 @@ export default function VideoList() {
     localStorage.removeItem('lp_member')
     localStorage.removeItem('lp_login_at')
     localStorage.removeItem('lp_token')
+    clearApiCache()
     navigate('/')
   }
 
@@ -41,18 +44,40 @@ export default function VideoList() {
       return
     }
 
-    apiGet('getVideos', { team }).then((res) => {
-      setVideos(res.videos || [])
+    let cancelled = false
+    setLoadError('')
+    apiGetCached('getVideos', { team }, (cached) => {
+      if (cancelled) return
+      setVideos(cached.videos || [])
       setLoading(false)
     })
+      .then((res) => {
+        if (cancelled) return
+        setVideos(res.videos || [])
+        setLoading(false)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setLoadError('読み込みに失敗しました。電波の良い所でもう一度お試しください')
+        setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [team, member, navigate])
+  }, [team, member, navigate, reloadKey])
+
+  function handleRetryLoad() {
+    setLoading(true)
+    setReloadKey((n) => n + 1)
+  }
 
   function handleLogout() {
     localStorage.removeItem('lp_team')
     localStorage.removeItem('lp_member')
     localStorage.removeItem('lp_login_at')
     localStorage.removeItem('lp_token')
+    clearApiCache()
     navigate('/')
   }
 
@@ -73,15 +98,23 @@ export default function VideoList() {
     setExpandedId(video.videoID)
     setFeedbackError('')
     if (!feedbackByVideo[video.videoID]) {
-      loadFeedback(video.videoID)
+      loadFeedback(video.videoID, true)
     }
   }
 
-  function loadFeedback(videoID) {
+  // useCache: 初めて開く時だけ、前回保存した内容を先に見せる(投稿・編集の直後は使わない)
+  function loadFeedback(videoID, useCache = false) {
     setFeedbackLoadingId(videoID)
-    apiGet('getFeedback', { videoID }).then((res) => {
-      setFeedbackByVideo((prev) => ({ ...prev, [videoID]: res.feedback || [] }))
+    const show = (data) => {
+      setFeedbackByVideo((prev) => ({ ...prev, [videoID]: data.feedback || [] }))
       setFeedbackLoadingId((current) => (current === videoID ? null : current))
+    }
+    const request = useCache
+      ? apiGetCached('getFeedback', { videoID }, show)
+      : apiGetCached('getFeedback', { videoID }, undefined, { allowStale: false })
+    request.then(show).catch(() => {
+      setFeedbackLoadingId((current) => (current === videoID ? null : current))
+      setFeedbackError('コメントの読み込みに失敗しました。もう一度開き直してください')
     })
   }
 
@@ -198,7 +231,16 @@ export default function VideoList() {
       <SectionCard icon="video" title="動画一覧">
         {loading && <p className="team-tag">読み込み中…</p>}
 
-        {!loading && videos.length === 0 && (
+        {!loading && loadError && videos.length === 0 && (
+          <div className="empty-state">
+            <p className="error-text">{loadError}</p>
+            <button type="button" className="btn-primary" onClick={handleRetryLoad}>
+              もう一度読み込む
+            </button>
+          </div>
+        )}
+
+        {!loading && !loadError && videos.length === 0 && (
           <div className="empty-state">まだ動画が投稿されていません</div>
         )}
 

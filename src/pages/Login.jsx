@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiGet, apiPost } from '../config.js'
+import { apiGet, apiGetCached, apiPost } from '../config.js'
 import StarField from '../components/StarField.jsx'
 
 function sleep(ms) {
@@ -31,13 +31,19 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    apiGet('getTeams').then((res) => {
+    // 「管理人」は常に一番下に表示する
+    const show = (res) => {
       const list = res.teams || []
-      // 「管理人」は常に一番下に表示する
       const sorted = [...list.filter((t) => t !== '管理人'), ...list.filter((t) => t === '管理人')]
       setTeams(sorted)
       setTeamsLoading(false)
-    })
+    }
+    apiGetCached('getTeams', {}, show)
+      .then(show)
+      .catch(() => {
+        setTeamsLoading(false)
+        setError('チーム一覧を読み込めませんでした。ページを再読み込みしてください')
+      })
   }, [])
 
   const isAdminTeam = team.trim() === '管理人'

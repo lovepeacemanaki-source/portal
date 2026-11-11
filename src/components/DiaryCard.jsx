@@ -51,6 +51,10 @@ export default function DiaryCard({ team, member }) {
       }
       setEntries(toEntriesMap(res.entries))
       setLoading(false)
+    }).catch(() => {
+      if (cancelled) return
+      setLoadError('読み込みに失敗しました。ページを再読み込みしてください')
+      setLoading(false)
     })
     return () => {
       cancelled = true
