@@ -87,7 +87,10 @@ export default function VideoDetail() {
           {feedback.length === 0 && (
             <p className="team-tag">まだフィードバックがありません</p>
           )}
-          {feedback.map((f) => (
+          {feedback
+            .slice()
+            .sort((a, b) => new Date(b.postedAt) - new Date(a.postedAt))
+            .map((f) => (
             <div key={f.feedbackID} className="feedback-item">
               <div className="feedback-item-name">{f.name}</div>
               <div className="feedback-item-text">{f.comment}</div>

@@ -719,6 +719,7 @@ export default function Admin() {
                   {!fbLoading &&
                     fbFeedback
                       .filter((f) => !f.replyTo)
+                      .sort((a, b) => new Date(b.postedAt) - new Date(a.postedAt))
                       .map((f) => {
                         const replies = fbFeedback.filter((r) => r.replyTo === f.feedbackID)
                         const isEditingThis = fbEditingId === f.feedbackID

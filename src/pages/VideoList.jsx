@@ -265,6 +265,7 @@ export default function VideoList() {
                         {!isFeedbackLoading &&
                           feedback
                           .filter((f) => !f.replyTo)
+                          .sort((a, b) => new Date(b.postedAt) - new Date(a.postedAt))
                           .map((f) => {
                             const replies = feedback.filter((r) => r.replyTo === f.feedbackID)
                             const isEditingThis = editingCommentId === f.feedbackID
