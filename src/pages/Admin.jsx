@@ -123,14 +123,35 @@ export default function Admin() {
     }
   }, [authed])
 
-  function loadPending() {
+  // silent: 2回目以降の更新では「読み込み中」に戻さず、今のアラートを表示したまま入れ替える
+  function loadPending(silent = false) {
     const token = localStorage.getItem('lp_token') || ''
-    setPendingLoading(true)
-    apiGet('getPendingFeedback', { token }).then((res) => {
-      setPending(res.success ? res.pending || [] : [])
-      setPendingLoading(false)
-    })
+    if (!silent) setPendingLoading(true)
+    apiGet('getPendingFeedback', { token })
+      .then((res) => {
+        if (res.success) setPending(res.pending || [])
+        setPendingLoading(false)
+      })
+      .catch(() => {
+        setPendingLoading(false)
+      })
   }
+
+  // 返信した瞬間にそのスレッドのアラートを画面から消す(サーバーの再取得を待たない)
+  function removePendingThread(threadId) {
+    setPending((prev) => prev.filter((p) => (p.threadId || p.feedbackID) !== threadId))
+  }
+
+  // 別の端末・タブで返信した場合に備えて、この画面に戻ってきた時にも最新にする
+  useEffect(() => {
+    if (!authed) return
+    function onVisible() {
+      if (document.visibilityState === 'visible') loadPending(true)
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed])
 
   // アラートの項目をクリックした時: 「全チームの動画一覧」を開いて、その動画のコメント欄を表示する
   function handlePendingClick(item) {
@@ -240,7 +261,7 @@ export default function Admin() {
         return
       }
       loadFbFeedback(videoID)
-      loadPending()
+      loadPending(true)
     } catch {
       setFbError('削除に失敗しました。時間をおいて再度お試しください')
     } finally {
@@ -266,8 +287,9 @@ export default function Admin() {
       }
       setFbReplyDrafts((prev) => ({ ...prev, [parentId]: '' }))
       setFbReplyingId(null)
+      removePendingThread(parentId)
       loadFbFeedback(videoID)
-      loadPending()
+      loadPending(true)
     } catch {
       setFbError('送信に失敗しました。時間をおいて再度お試しください')
     } finally {
