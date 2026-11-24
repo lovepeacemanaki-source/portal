@@ -142,14 +142,21 @@ export default function Admin() {
     setPending((prev) => prev.filter((p) => (p.threadId || p.feedbackID) !== threadId))
   }
 
-  // 別の端末・タブで返信した場合に備えて、この画面に戻ってきた時にも最新にする
+  // 再読み込みしなくても最新になるように、この画面を見ている間は一定間隔で自動更新する。
+  // (別の端末・タブで返信した場合や、新しいコメントが届いた場合に反映される)
   useEffect(() => {
     if (!authed) return
-    function onVisible() {
+    function refreshIfVisible() {
       if (document.visibilityState === 'visible') loadPending(true)
     }
-    document.addEventListener('visibilitychange', onVisible)
-    return () => document.removeEventListener('visibilitychange', onVisible)
+    const timer = setInterval(refreshIfVisible, 45000)
+    document.addEventListener('visibilitychange', refreshIfVisible)
+    window.addEventListener('focus', refreshIfVisible)
+    return () => {
+      clearInterval(timer)
+      document.removeEventListener('visibilitychange', refreshIfVisible)
+      window.removeEventListener('focus', refreshIfVisible)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed])
 
