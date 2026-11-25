@@ -87,6 +87,8 @@ export default function Admin() {
 
   const [pending, setPending] = useState([])
   const [pendingLoading, setPendingLoading] = useState(true)
+  const [pendingError, setPendingError] = useState('')
+  const [dismissingId, setDismissingId] = useState(null)
   const [openCard1Signal, setOpenCard1Signal] = useState(0)
   const card1Ref = useRef(null)
 
@@ -135,6 +137,26 @@ export default function Admin() {
       .catch(() => {
         setPendingLoading(false)
       })
+  }
+
+  // 「対応済み」: ポータル外で返事済みなどのコメントを、返信なしでアラートから外す(コメント自体は残る)
+  async function handleDismissPending(item) {
+    if (!window.confirm('このコメントを「対応済み」にして、アラートから消します。\n(コメント自体は消えません)\nよろしいですか？')) return
+    setPendingError('')
+    setDismissingId(item.feedbackID)
+    try {
+      const res = await apiPost('dismissFeedback', { feedbackID: item.feedbackID })
+      if (!res.success) {
+        setPendingError('対応済みにできませんでした。時間をおいて再度お試しください')
+        return
+      }
+      setPending((prev) => prev.filter((p) => p.feedbackID !== item.feedbackID))
+      loadPending(true)
+    } catch {
+      setPendingError('対応済みにできませんでした。時間をおいて再度お試しください')
+    } finally {
+      setDismissingId(null)
+    }
   }
 
   // 返信した瞬間にそのスレッドのアラートを画面から消す(サーバーの再取得を待たない)
@@ -687,25 +709,37 @@ export default function Admin() {
           </div>
           <div className="pending-alert-list">
             {pending.map((p) => (
-              <button
-                key={p.feedbackID}
-                type="button"
-                className="pending-alert-item"
-                onClick={() => handlePendingClick(p)}
-              >
-                <div className="pending-alert-item-main">
-                  <p className="pending-alert-item-sub">
-                    {p.team} ・ {p.name}
-                  </p>
-                  <p className="pending-alert-item-text">
-                    「{p.videoTitle}」に{p.comment}
-                  </p>
-                </div>
-                <span className="pending-alert-item-time">{formatRelativeTime(p.postedAt)}</span>
-              </button>
+              <div key={p.feedbackID} className="pending-alert-row">
+                <button
+                  type="button"
+                  className="pending-alert-item"
+                  onClick={() => handlePendingClick(p)}
+                >
+                  <div className="pending-alert-item-main">
+                    <p className="pending-alert-item-sub">
+                      {p.team} ・ {p.name}
+                    </p>
+                    <p className="pending-alert-item-text">
+                      「{p.videoTitle}」に{p.comment}
+                    </p>
+                  </div>
+                  <span className="pending-alert-item-time">{formatRelativeTime(p.postedAt)}</span>
+                </button>
+                <button
+                  type="button"
+                  className="pending-alert-dismiss"
+                  disabled={dismissingId === p.feedbackID}
+                  onClick={() => handleDismissPending(p)}
+                >
+                  {dismissingId === p.feedbackID ? '処理中…' : '対応済み'}
+                </button>
+              </div>
             ))}
           </div>
-          <p className="pending-alert-hint">クリックするとその動画のコメント欄が開きます。返信すると一覧から消えます。</p>
+          {pendingError && <p className="error-text">{pendingError}</p>}
+          <p className="pending-alert-hint">
+            クリックするとその動画のコメント欄が開きます。返信すると一覧から消えます。ポータル以外で返事済みの場合は「対応済み」を押すと消えます(コメントは消えません)。
+          </p>
         </div>
       )}
 

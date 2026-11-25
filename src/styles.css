@@ -981,7 +981,38 @@ button {
   gap: 0.5rem;
 }
 
+.pending-alert-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.pending-alert-dismiss {
+  flex-shrink: 0;
+  background: #ffffff;
+  border: 1px solid rgba(4, 33, 103, 0.18);
+  border-radius: 10px;
+  padding: 0 0.8rem;
+  font-size: 0.78rem;
+  color: #042167;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pending-alert-dismiss:hover:not(:disabled) {
+  border-color: var(--accent-rose);
+  background: rgba(255, 240, 244, 0.7);
+}
+
+.pending-alert-dismiss:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .pending-alert-item {
+  flex: 1;
+  min-width: 0;
   width: 100%;
   display: flex;
   align-items: center;
