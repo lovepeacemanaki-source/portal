@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiGet, apiGetCached, apiPost } from '../config.js'
 import StarField from '../components/StarField.jsx'
+import ReloadButton from '../components/ReloadButton.jsx'
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -176,6 +177,7 @@ export default function Login() {
   return (
     <div className="login-screen">
       <StarField withLogoStars />
+      <ReloadButton />
       <div className="login-card">
         <img
           src="/login-logo.png"

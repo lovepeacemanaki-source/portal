@@ -4,6 +4,7 @@ import { apiGetCached, apiPost, clearApiCache } from '../config.js'
 import StarField from '../components/StarField.jsx'
 import SectionCard from '../components/SectionCard.jsx'
 import DiaryCard from '../components/DiaryCard.jsx'
+import ReloadButton from '../components/ReloadButton.jsx'
 
 export default function VideoList() {
   const navigate = useNavigate()
@@ -210,6 +211,7 @@ export default function VideoList() {
   return (
     <div className="page">
       <StarField withLogoStars />
+      <ReloadButton />
       <button className="logout-link" onClick={handleLogout}>
         ログアウト
       </button>

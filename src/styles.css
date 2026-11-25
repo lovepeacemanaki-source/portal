@@ -419,6 +419,24 @@ button {
   color: var(--text-dim);
 }
 
+.reload-link {
+  position: absolute;
+  top: 1.4rem;
+  left: 1.5rem;
+  z-index: 2;
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  padding: 0.3rem 0.4rem;
+}
+
+.reload-link:hover {
+  color: var(--text-dim);
+}
+
 /* ===== カード共通(動画一覧・自己との対話) ===== */
 /* 背景の星空は紺のまま、カードの中身だけロゴと同じ色味の明るいグラデーションにして見やすくする */
 

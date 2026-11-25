@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiGet, apiPost } from '../config.js'
+import ReloadButton from '../components/ReloadButton.jsx'
 
 const ADMIN_REPLY_NAME = '吉井孝'
 
@@ -658,13 +659,14 @@ export default function Admin() {
       <div
         style={{
           display: 'flex',
+          flexWrap: 'wrap',
           alignItems: 'flex-start',
           justifyContent: 'space-between',
           gap: '1rem',
           marginBottom: '2rem',
         }}
       >
-        <div>
+        <div style={{ minWidth: 0 }}>
           <div
             style={{
               fontSize: '0.72rem',
@@ -687,9 +689,12 @@ export default function Admin() {
             チーム管理画面
           </h1>
         </div>
-        <button className="btn-ghost" onClick={handleLogout}>
-          ログアウト
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0, marginLeft: 'auto' }}>
+          <ReloadButton className="btn-ghost" />
+          <button className="btn-ghost" onClick={handleLogout}>
+            ログアウト
+          </button>
+        </div>
       </div>
 
       {!pendingLoading && pending.length > 0 && (
